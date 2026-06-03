@@ -1,0 +1,31 @@
+# 관심 기업 (Big4·회계법인 위주)
+companies:
+  - name: 삼일회계법인
+    news_keywords:
+      - 삼일회계법인
+      - Deloitte Korea
+  - name: 안진회계법인
+    news_keywords:
+      - 안진회계법인
+      - EY Korea
+  - name: 삼정회계법인
+    news_keywords:
+      - 삼정회계법인
+      - KPMG Korea
+  - name: 한영회계법인
+    news_keywords:
+      - 한영회계법인
+      - PwC Korea
+
+# 네이버 뉴스: 키워드당 가져올 기사 수
+naver:
+  news_per_keyword: 3
+
+# 사람인 채용 검색
+saramin:
+  search_keywords:
+    - 회계법인
+    - 감사
+    - Big4
+    - CPA
+  max_results_per_keyword: 5
