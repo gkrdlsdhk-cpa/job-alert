@@ -24,9 +24,12 @@ git init
 git add .
 git commit -m "Add job-alert with GitHub Actions daily schedule"
 git branch -M main
-git remote add origin https://github.com/본인아이디/job-alert.git
+git remote add origin https://github.com/gkrdlsdhk-cpa/job-alert.git
 git push -u origin main
 ```
+
+> 이미 올려 두었다면 2번은 건너뛰고 **3번 Secrets**부터 하면 됩니다.  
+> 저장소: https://github.com/gkrdlsdhk-cpa/job-alert
 
 > `git` 명령이 안 되면: `xcode-select --install` 먼저 실행
 
@@ -56,11 +59,22 @@ GitHub 저장소 → **Settings** → **Secrets and variables** → **Actions** 
 
 ## 4. 수동 테스트
 
-GitHub 저장소 → **Actions** → **Daily Job Briefing** → **Run workflow**
+### 매일 12시 브리핑 (뉴스 + 사람인)
+
+GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 
 1~2분 후:
-- **Gmail** `[취업 브리핑]` 메일 (전체 뉴스·채용)
+- **Gmail** `[취업 브리핑]` 메일 (뉴스 + 사람인)
 - **카카오톡** 「Gmail 확인」 알림 (`NOTIFY_VIA=both` 또는 `kakao`일 때)
+
+### 회계사회 수습CPA 실시간 (카카오 직접)
+
+GitHub → **Actions** → **KICPA Job Watch** → **Run workflow**
+
+- **첫 실행**: 기존 공고는 알림 없이 등록만 (중복 방지)
+- **이후 ~10분마다**: 신규 공고만 카카오톡 `[회계사회 수습CPA 신규]` + **공고 보기** 버튼
+- 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN` (및 Client Secret 사용 시 `KAKAO_CLIENT_SECRET`)
+- 카카오 개발자 → **제품 링크 관리** → 웹 도메인에 `https://www.kicpa.or.kr` 등록
 
 ---
 

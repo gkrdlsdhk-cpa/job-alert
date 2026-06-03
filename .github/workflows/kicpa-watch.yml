@@ -1,0 +1,58 @@
+name: KICPA Job Watch
+
+on:
+  schedule:
+    # 약 10분마다 (GitHub 부하 시 지연 가능)
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore notified-job state
+        uses: actions/cache@v4
+        with:
+          path: data/kicpa_notified.json
+          key: kicpa-notified-ids-v1
+          restore-keys: |
+            kicpa-notified-ids-v1
+
+      - name: Check Kakao Secrets
+        env:
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+        run: |
+          missing=""
+          for name in KAKAO_REST_API_KEY KAKAO_REFRESH_TOKEN; do
+            eval "val=\$$name"
+            if [ -z "$val" ]; then
+              missing="$missing $name"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "GitHub Secrets에 카카오 키를 등록해 주세요:$missing"
+            exit 1
+          fi
+
+      - name: Watch KICPA trainee CPA jobs
+        env:
+          KICPA_STATE_FILE: data/kicpa_notified.json
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+          KAKAO_REDIRECT_URI: http://localhost:8080
+        run: python kicpa_watch.py

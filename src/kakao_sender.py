@@ -14,6 +14,7 @@ from src.kakao_oauth import kakao_client_fields
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 KAKAO_MEMO_URL = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
 GMAIL_ICON_URL = "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico"
+KAKAO_TEXT_MAX = 200
 
 
 def gmail_briefing_url(email_to: str) -> str:
@@ -78,6 +79,40 @@ def _build_feed_template(email_to: str, mail_url: str, today: str) -> dict:
             }
         ],
     }
+
+
+def _send_text_template(access_token: str, text: str, link: str, button_title: str) -> None:
+    if len(text) > KAKAO_TEXT_MAX:
+        raise ValueError(f"카카오 메시지는 {KAKAO_TEXT_MAX}자 이하여야 합니다: {len(text)}자")
+
+    web_link = {"web_url": link, "mobile_web_url": link}
+    template = {
+        "object_type": "text",
+        "text": text,
+        "link": web_link,
+        "button_title": button_title,
+    }
+    response = requests.post(
+        KAKAO_MEMO_URL,
+        headers={"Authorization": f"Bearer {access_token}"},
+        data={"template_object": json.dumps(template, ensure_ascii=False)},
+        timeout=15,
+    )
+    response.raise_for_status()
+
+
+def send_kicpa_job_alert(title: str, link: str) -> None:
+    """회계사회 신규 공고 — 제목 + 링크만 카카오톡으로 직접 전송."""
+    access_token = get_access_token()
+    prefix = "[회계사회 수습CPA 신규]\n"
+    room = KAKAO_TEXT_MAX - len(prefix) - 1
+    short_title = title
+    if len(short_title) > room:
+        short_title = short_title[: room - 1] + "…"
+    text = f"{prefix}{short_title}"
+
+    _send_text_template(access_token, text, link, "공고 보기")
+    print(f"카카오톡 공고 알림 → {short_title}")
 
 
 def send_notification(email_to: str) -> None:

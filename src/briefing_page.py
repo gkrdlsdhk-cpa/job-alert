@@ -7,7 +7,6 @@ from html import escape
 from pathlib import Path
 from urllib.parse import quote_plus
 
-
 def saramin_search_url(keyword: str) -> str:
     return (
         "https://www.saramin.co.kr/zf_user/search/recruit"

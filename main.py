@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""매일 실행: 뉴스 + 사람인 수집 → Gmail 전체 브리핑 (+ 선택: 카카오 알림)."""
+"""매일 실행: 뉴스 + 채용 수집 → Gmail 전체 브리핑 (+ 선택: 카카오 알림)."""
 
 from __future__ import annotations
 

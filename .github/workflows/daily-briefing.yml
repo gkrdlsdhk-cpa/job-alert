@@ -23,6 +23,46 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Check GitHub Secrets
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          NOTIFY_VIA: ${{ secrets.NOTIFY_VIA }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+        run: |
+          missing=""
+          for name in NAVER_CLIENT_ID NAVER_CLIENT_SECRET NOTIFY_VIA EMAIL_FROM EMAIL_PASSWORD EMAIL_TO; do
+            eval "val=\$$name"
+            if [ -z "$val" ]; then
+              missing="$missing $name"
+            fi
+          done
+          case "$NOTIFY_VIA" in
+            email|kakao|both) ;;
+            *)
+              echo "NOTIFY_VIA는 email, kakao, both 중 하나여야 합니다. (현재: '$NOTIFY_VIA')"
+              exit 1
+              ;;
+          esac
+          if [ "$NOTIFY_VIA" = "kakao" ] || [ "$NOTIFY_VIA" = "both" ]; then
+            for name in KAKAO_REST_API_KEY KAKAO_REFRESH_TOKEN; do
+              eval "val=\$$name"
+              if [ -z "$val" ]; then
+                missing="$missing $name"
+              fi
+            done
+          fi
+          if [ -n "$missing" ]; then
+            echo "GitHub → Settings → Secrets and variables → Actions 에서 등록해 주세요:"
+            echo "$missing"
+            echo "자세한 목록: CLOUD_SETUP.md"
+            exit 1
+          fi
+
       - name: Run job-alert
         env:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
