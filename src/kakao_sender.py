@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime
+from urllib.parse import quote
 
 import requests
 
@@ -13,7 +14,14 @@ from src.kakao_oauth import kakao_client_fields
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 KAKAO_MEMO_URL = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
 KAKAO_TEXT_MAX = 200
-GMAIL_INBOX_URL = "https://mail.google.com/mail/u/0/#inbox"
+
+
+def gmail_briefing_url(email_to: str) -> str:
+    """본인 Gmail 계정에서 오늘 브리핑 메일 검색 화면으로 연결."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    authuser = quote(email_to, safe="")
+    query = quote(f"[취업 브리핑] {today}", safe="")
+    return f"https://mail.google.com/mail/?authuser={authuser}#search/{query}"
 
 
 def _require_env(name: str) -> str:
@@ -54,10 +62,11 @@ def send_notification(email_to: str) -> None:
     """Gmail에서 전체 브리핑을 확인하라는 카카오 알림 1통."""
     access_token = get_access_token()
     today = datetime.now().strftime("%Y-%m-%d")
+    mail_url = gmail_briefing_url(email_to)
     text = (
         f"📋 취업 브리핑 ({today})\n\n"
-        f"전체 뉴스·채용 공고는 Gmail로 보냈어요.\n"
-        f"받은메일함({email_to})을 확인하세요."
+        f"전체 내용은 {email_to} 으로 보냈어요.\n"
+        "아래 버튼을 누르면 브리핑 메일로 바로 이동해요."
     )
     if len(text) > KAKAO_TEXT_MAX:
         text = _truncate(text, KAKAO_TEXT_MAX)
@@ -66,10 +75,10 @@ def send_notification(email_to: str) -> None:
         "object_type": "text",
         "text": text,
         "link": {
-            "web_url": GMAIL_INBOX_URL,
-            "mobile_web_url": GMAIL_INBOX_URL,
+            "web_url": mail_url,
+            "mobile_web_url": mail_url,
         },
-        "button_title": "Gmail 열기",
+        "button_title": "브리핑 메일 보기",
     }
 
     response = requests.post(
@@ -79,7 +88,7 @@ def send_notification(email_to: str) -> None:
         timeout=15,
     )
     response.raise_for_status()
-    print("카카오톡 알림 발송 완료 (Gmail 확인)")
+    print(f"카카오톡 알림 발송 완료 → {mail_url}")
 
 
 def _truncate(text: str, max_len: int) -> str:
