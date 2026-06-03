@@ -13,7 +13,7 @@ from src.kakao_oauth import kakao_client_fields
 
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 KAKAO_MEMO_URL = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
-KAKAO_TEXT_MAX = 200
+GMAIL_ICON_URL = "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico"
 
 
 def gmail_briefing_url(email_to: str) -> str:
@@ -58,28 +58,34 @@ def get_access_token() -> str:
     return payload["access_token"]
 
 
+def _build_feed_template(email_to: str, mail_url: str, today: str) -> dict:
+    """피드 템플릿: 버튼/카드 클릭 시 Gmail 브리핑 검색으로 이동."""
+    link = {"web_url": mail_url, "mobile_web_url": mail_url}
+    return {
+        "object_type": "feed",
+        "content": {
+            "title": f"📋 취업 브리핑 ({today})",
+            "description": f"{email_to} 으로 전체 내용을 보냈어요.",
+            "image_url": GMAIL_ICON_URL,
+            "image_width": 64,
+            "image_height": 64,
+            "link": link,
+        },
+        "buttons": [
+            {
+                "title": "브리핑 메일 보기",
+                "link": link,
+            }
+        ],
+    }
+
+
 def send_notification(email_to: str) -> None:
-    """Gmail에서 전체 브리핑을 확인하라는 카카오 알림 1통."""
+    """Gmail 브리핑 링크가 포함된 카카오 알림 1통."""
     access_token = get_access_token()
     today = datetime.now().strftime("%Y-%m-%d")
     mail_url = gmail_briefing_url(email_to)
-    text = (
-        f"📋 취업 브리핑 ({today})\n\n"
-        f"전체 내용은 {email_to} 으로 보냈어요.\n"
-        "아래 버튼을 누르면 브리핑 메일로 바로 이동해요."
-    )
-    if len(text) > KAKAO_TEXT_MAX:
-        text = _truncate(text, KAKAO_TEXT_MAX)
-
-    template = {
-        "object_type": "text",
-        "text": text,
-        "link": {
-            "web_url": mail_url,
-            "mobile_web_url": mail_url,
-        },
-        "button_title": "브리핑 메일 보기",
-    }
+    template = _build_feed_template(email_to, mail_url, today)
 
     response = requests.post(
         KAKAO_MEMO_URL,
@@ -89,9 +95,7 @@ def send_notification(email_to: str) -> None:
     )
     response.raise_for_status()
     print(f"카카오톡 알림 발송 완료 → {mail_url}")
-
-
-def _truncate(text: str, max_len: int) -> str:
-    if len(text) <= max_len:
-        return text
-    return text[: max_len - 1] + "…"
+    print(
+        "⚠️  버튼이 안 열리면 카카오 개발자 → 제품 링크 관리 → 웹 도메인에 "
+        "https://mail.google.com 을 등록했는지 확인하세요."
+    )
