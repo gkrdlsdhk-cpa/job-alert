@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""매일 실행할 메인 스크립트: 뉴스 + 사람인 채용 → 이메일/카카오톡 발송."""
+"""매일 실행: 뉴스 + 사람인 수집 → Gmail 전체 브리핑 (+ 선택: 카카오 알림)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import yaml
 from dotenv import load_dotenv
 
 from src.email_sender import send_digest as send_email_digest
-from src.kakao_sender import send_digest as send_kakao_digest
+from src.kakao_sender import send_notification as send_kakao_notification
 from src.naver_news import fetch_company_news
 from src.saramin_jobs import fetch_all_jobs
 
@@ -25,6 +25,7 @@ def load_config() -> dict:
 def main() -> int:
     load_dotenv()
     config = load_config()
+    notify_via = os.getenv("NOTIFY_VIA", "both").strip().lower()
 
     print("1/3 네이버 뉴스 수집 중...")
     company_news = fetch_company_news(
@@ -39,19 +40,15 @@ def main() -> int:
     )
 
     print("3/3 알림 발송 중...")
-    notify_via = os.getenv("NOTIFY_VIA", "email").strip().lower()
-
-    if notify_via in {"email", "both"}:
-        send_email_digest(company_news, saramin_jobs)
-        print("이메일 발송 완료")
+    email_to = send_email_digest(company_news, saramin_jobs)
+    print(f"Gmail 발송 완료 → {email_to}")
 
     if notify_via in {"kakao", "both"}:
-        send_kakao_digest(company_news, saramin_jobs)
-
-    if notify_via not in {"email", "kakao", "both"}:
+        send_kakao_notification(email_to)
+    elif notify_via != "email":
         raise ValueError("NOTIFY_VIA는 email, kakao, both 중 하나여야 합니다.")
 
-    print("완료! 메일함 또는 카카오톡 '나와의 채팅'을 확인해 주세요.")
+    print("완료! Gmail 받은편지함을 확인해 주세요.")
     return 0
 
 

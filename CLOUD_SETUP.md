@@ -42,13 +42,13 @@ GitHub 저장소 → **Settings** → **Secrets and variables** → **Actions** 
 |-------------|------|------|
 | `NAVER_CLIENT_ID` | ✅ | 네이버 Client ID |
 | `NAVER_CLIENT_SECRET` | ✅ | 네이버 Client Secret |
-| `NOTIFY_VIA` | ✅ | `kakao` (카카오만) 또는 `email` 또는 `both` |
-| `KAKAO_REST_API_KEY` | 카카오 시 | REST API 키 |
-| `KAKAO_REFRESH_TOKEN` | 카카오 시 | refresh token |
+| `NOTIFY_VIA` | ✅ | `both` 추천 (Gmail 전체 + 카카오 알림) / `email` / `kakao` |
+| `EMAIL_FROM` | ✅ | Gmail 주소 |
+| `EMAIL_PASSWORD` | ✅ | Gmail 앱 비밀번호 |
+| `EMAIL_TO` | ✅ | 받을 Gmail (본인 주소) |
+| `KAKAO_REST_API_KEY` | 카카오 알림 시 | REST API 키 |
+| `KAKAO_REFRESH_TOKEN` | 카카오 알림 시 | refresh token |
 | `KAKAO_CLIENT_SECRET` | 선택 | Client Secret **사용** 중일 때만 |
-| `EMAIL_FROM` | 이메일 시 | Gmail 주소 |
-| `EMAIL_PASSWORD` | 이메일 시 | Gmail 앱 비밀번호 |
-| `EMAIL_TO` | 이메일 시 | 받을 메일 |
 
 > **`.env` 파일 자체는 GitHub에 올리지 마세요.** Secret으로만 등록합니다.
 
@@ -56,9 +56,11 @@ GitHub 저장소 → **Settings** → **Secrets and variables** → **Actions** 
 
 ## 4. 수동 테스트
 
-GitHub 저장소 → **Actions** 탭 → **Daily Job Briefing** → **Run workflow** → **Run workflow**
+GitHub 저장소 → **Actions** → **Daily Job Briefing** → **Run workflow**
 
-1~2분 후 카카오톡 **「나와의 채팅」** 또는 Gmail을 확인하세요.
+1~2분 후:
+- **Gmail** `[취업 브리핑]` 메일 (전체 뉴스·채용)
+- **카카오톡** 「Gmail 확인」 알림 (`NOTIFY_VIA=both` 또는 `kakao`일 때)
 
 ---
 

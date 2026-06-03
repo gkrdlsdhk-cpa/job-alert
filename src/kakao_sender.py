@@ -1,18 +1,19 @@
-"""카카오톡 '나에게 보내기' API로 브리핑을 전송합니다."""
+"""카카오톡 '나에게 보내기' — Gmail 확인 알림."""
 
 from __future__ import annotations
 
 import json
 import os
+from datetime import datetime
 
 import requests
 
-from src.digest import build_text_lines, chunk_lines
 from src.kakao_oauth import kakao_client_fields
 
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 KAKAO_MEMO_URL = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
 KAKAO_TEXT_MAX = 200
+GMAIL_INBOX_URL = "https://mail.google.com/mail/u/0/#inbox"
 
 
 def _require_env(name: str) -> str:
@@ -23,7 +24,6 @@ def _require_env(name: str) -> str:
 
 
 def get_access_token() -> str:
-    """저장된 refresh token으로 access token을 발급합니다."""
     _require_env("KAKAO_REST_API_KEY")
     refresh_token = _require_env("KAKAO_REFRESH_TOKEN")
 
@@ -43,25 +43,33 @@ def get_access_token() -> str:
     if new_refresh and new_refresh != refresh_token:
         print(
             "⚠️  카카오 refresh token이 갱신되었습니다. "
-            ".env의 KAKAO_REFRESH_TOKEN 값을 아래 새 값으로 바꿔 주세요."
+            ".env / GitHub Secret의 KAKAO_REFRESH_TOKEN을 업데이트하세요."
         )
         print(f"KAKAO_REFRESH_TOKEN={new_refresh}")
 
     return payload["access_token"]
 
 
-def send_text_message(access_token: str, text: str) -> None:
+def send_notification(email_to: str) -> None:
+    """Gmail에서 전체 브리핑을 확인하라는 카카오 알림 1통."""
+    access_token = get_access_token()
+    today = datetime.now().strftime("%Y-%m-%d")
+    text = (
+        f"📋 취업 브리핑 ({today})\n\n"
+        f"전체 뉴스·채용 공고는 Gmail로 보냈어요.\n"
+        f"받은메일함({email_to})을 확인하세요."
+    )
     if len(text) > KAKAO_TEXT_MAX:
-        raise ValueError(f"카카오 메시지는 {KAKAO_TEXT_MAX}자 이하여야 합니다: {len(text)}자")
+        text = _truncate(text, KAKAO_TEXT_MAX)
 
     template = {
         "object_type": "text",
         "text": text,
         "link": {
-            "web_url": "https://www.naver.com",
-            "mobile_web_url": "https://m.naver.com",
+            "web_url": GMAIL_INBOX_URL,
+            "mobile_web_url": GMAIL_INBOX_URL,
         },
-        "button_title": "네이버",
+        "button_title": "Gmail 열기",
     }
 
     response = requests.post(
@@ -71,17 +79,10 @@ def send_text_message(access_token: str, text: str) -> None:
         timeout=15,
     )
     response.raise_for_status()
+    print("카카오톡 알림 발송 완료 (Gmail 확인)")
 
 
-def send_digest(
-    company_news: dict[str, list[dict]],
-    saramin_jobs: dict[str, list[dict]],
-) -> None:
-    access_token = get_access_token()
-    lines = build_text_lines(company_news, saramin_jobs)
-    messages = chunk_lines(lines)
-
-    for message in messages:
-        send_text_message(access_token, message)
-
-    print(f"카카오톡 메시지 {len(messages)}건 전송 완료")
+def _truncate(text: str, max_len: int) -> str:
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 1] + "…"
