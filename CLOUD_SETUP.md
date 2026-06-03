@@ -67,14 +67,19 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 - **Gmail** `[취업 브리핑]` 메일 (뉴스 + 사람인)
 - **카카오톡** 「Gmail 확인」 알림 (`NOTIFY_VIA=both` 또는 `kakao`일 때)
 
-### 회계사회 수습CPA 실시간 (카카오 직접)
+### 실시간 카카오 알림 (회계사회 + 삼일PwC 정기채용)
 
-GitHub → **Actions** → **KICPA Job Watch** → **Run workflow**
+GitHub → **Actions** → **Realtime Job Alerts** → **Run workflow**
 
-- **첫 실행**: 기존 공고는 알림 없이 등록만 (중복 방지)
-- **이후 ~10분마다**: 신규 공고만 카카오톡 `[회계사회 수습CPA 신규]` + **공고 보기** 버튼
-- 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN` (및 Client Secret 사용 시 `KAKAO_CLIENT_SECRET`)
-- 카카오 개발자 → **제품 링크 관리** → 웹 도메인에 `https://www.kicpa.or.kr` 등록
+| 대상 | 알림 시점 | 카카오 메시지 |
+|------|-----------|----------------|
+| 회계사회 구인(수습CPA) | 신규 공고 등록 | `[회계사회 수습CPA 신규]` + 공고 보기 |
+| 삼일PwC 정기채용 | 모집 오픈(지원 링크·모집 중 문구 등장) | `[삼일PwC 정기채용]` + 채용 보기 |
+
+- **첫 실행**: 현재 상태만 등록 (스팸 방지)
+- **이후 ~10분마다** 자동 확인
+- 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
+- 카카오 **제품 링크 관리** 웹 도메인: `https://www.kicpa.or.kr`, `https://www.pwc.com`
 
 ---
 

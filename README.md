@@ -4,7 +4,8 @@
 
 - **네이버 뉴스**: 삼일·안진·삼정·한영 등 관심 기업 기사
 - **사람인**: 회계법인, 감사, Big4, CPA 키워드 채용 공고
-- **한국공인회계사회 구인(수습CPA)**: 신규 공고 시 **카카오톡 실시간** (제목 + 링크, `kicpa_watch.py`)
+- **한국공인회계사회 구인(수습CPA)**: 신규 공고 시 카카오 실시간 (`kicpa_watch.py`)
+- **삼일PwC 정기채용** ([링크](https://pwc.to/2xLHIx4)): 모집 오픈 시 카카오 실시간 (`pwc_watch.py`)
 - **알림**: Gmail로 HTML 메일 발송
 
 ---
@@ -212,9 +213,18 @@ cp ~/job-alert/com.jobalert.kicpa-watch.plist.example ~/Library/LaunchAgents/com
 launchctl load ~/Library/LaunchAgents/com.jobalert.kicpa-watch.plist
 ```
 
-### 10-4. Mac 꺼져 있어도 (GitHub Actions)
+### 10-4. 삼일PwC 정기채용 모집 오픈 알림
 
-`CLOUD_SETUP.md` 4번 — **KICPA Job Watch** 워크플로 (~10분마다 자동 실행)
+```bash
+python pwc_watch.py --seed   # 최초 1회
+python pwc_watch.py          # 테스트
+```
+
+모집이 열리면 카카오 `[삼일PwC 정기채용]` + 제목 + **채용 보기** 링크 (`https://pwc.to/2xLHIx4`).
+
+### 10-5. Mac 꺼져 있어도 (GitHub Actions)
+
+`CLOUD_SETUP.md` 4번 — **Realtime Job Alerts** (~10분마다, 회계사회 + PwC)
 
 ---
 

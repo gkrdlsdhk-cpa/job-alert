@@ -101,18 +101,34 @@ def _send_text_template(access_token: str, text: str, link: str, button_title: s
     response.raise_for_status()
 
 
-def send_kicpa_job_alert(title: str, link: str) -> None:
-    """회계사회 신규 공고 — 제목 + 링크만 카카오톡으로 직접 전송."""
+def send_link_alert(
+    prefix_line: str,
+    title: str,
+    link: str,
+    *,
+    button_title: str = "열기",
+) -> None:
+    """제목 + 링크 카카오 텍스트 메시지 (나에게 보내기)."""
     access_token = get_access_token()
-    prefix = "[회계사회 수습CPA 신규]\n"
+    prefix = prefix_line if prefix_line.endswith("\n") else f"{prefix_line}\n"
     room = KAKAO_TEXT_MAX - len(prefix) - 1
     short_title = title
     if len(short_title) > room:
         short_title = short_title[: room - 1] + "…"
     text = f"{prefix}{short_title}"
 
-    _send_text_template(access_token, text, link, "공고 보기")
-    print(f"카카오톡 공고 알림 → {short_title}")
+    _send_text_template(access_token, text, link, button_title)
+    print(f"카카오톡 알림 → {short_title}")
+
+
+def send_kicpa_job_alert(title: str, link: str) -> None:
+    """회계사회 신규 공고 — 제목 + 링크만 카카오톡으로 직접 전송."""
+    send_link_alert("[회계사회 수습CPA 신규]", title, link, button_title="공고 보기")
+
+
+def send_pwc_recruitment_alert(title: str, link: str) -> None:
+    """삼일PwC 정기채용 모집 오픈 — 제목 + 링크."""
+    send_link_alert("[삼일PwC 정기채용]", title, link, button_title="채용 보기")
 
 
 def send_notification(email_to: str) -> None:
