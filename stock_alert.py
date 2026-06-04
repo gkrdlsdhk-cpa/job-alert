@@ -4,17 +4,13 @@
 from __future__ import annotations
 
 import sys
-from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 import yaml
 from dotenv import load_dotenv
 
 from src.kakao_sender import send_stock_quotes_alert
 from src.stock_quotes import fetch_quotes, format_kakao_body
-
-KST = ZoneInfo("Asia/Seoul")
 
 
 def load_config() -> dict:
@@ -31,16 +27,13 @@ def main() -> int:
     if not symbols:
         raise ValueError("config.yaml의 stock_alert.symbols를 설정해 주세요.")
 
-    now = datetime.now(KST)
-    as_of = now.strftime("%m/%d %H:%M")
-
     print("주가 조회 중...")
     quotes = fetch_quotes(symbols)
     for q in quotes:
         sign = "+" if q.change_pct >= 0 else ""
         print(f"  {q.name}({q.symbol}) ${q.price:,.2f} {sign}{q.change_pct:.2f}%")
 
-    body = format_kakao_body(quotes, as_of=as_of)
+    body = format_kakao_body(quotes)
     print("카카오톡 발송 중...")
     send_stock_quotes_alert(body, link=quotes[0].link if quotes else None)
     print("완료!")

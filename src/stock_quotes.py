@@ -1,4 +1,4 @@
-"""네이버 증권 해외주식 페이지에서 미국 주식 시세를 조회합니다."""
+"""네이버 증권에서 미국 주식·지수 시세를 조회합니다."""
 
 from __future__ import annotations
 
@@ -11,6 +11,10 @@ from typing import Any
 import requests
 
 NAVER_WORLD_STOCK_URL = "https://m.stock.naver.com/worldstock/stock/{code}/total"
+NAVER_WORLD_INDEX_URL = "https://m.stock.naver.com/worldstock/index/{code}/total"
+NAVER_INDEX_POLL_URL = (
+    "https://polling.finance.naver.com/api/realtime/worldstock/index/{code}"
+)
 DEFAULT_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -54,6 +58,8 @@ def _parse_naver_code(entry: dict[str, str]) -> str:
     symbol = entry.get("symbol", "").strip().upper()
     if not symbol:
         raise ValueError("stock_alert 항목에 naver_code 또는 symbol이 필요합니다.")
+    if entry.get("kind", "stock").strip().lower() == "index":
+        return f".{symbol}" if not symbol.startswith(".") else symbol
     return f"{symbol}.O" if "." not in symbol else symbol
 
 
@@ -61,10 +67,51 @@ def _display_symbol(entry: dict[str, str], naver_code: str) -> str:
     symbol = entry.get("symbol", "").strip().upper()
     if symbol:
         return symbol
-    return naver_code.split(".", 1)[0]
+    return naver_code.lstrip(".").split(".", 1)[0]
 
 
-def fetch_quote(entry: dict[str, str]) -> StockQuote:
+def _fetch_index_quote(entry: dict[str, str]) -> StockQuote:
+    """네이버 증권 해외 지수 (예: 나스닥 .IXIC)."""
+    naver_code = _parse_naver_code(entry)
+    name = entry.get("name", _display_symbol(entry, naver_code))
+    poll_url = NAVER_INDEX_POLL_URL.format(code=naver_code)
+    page_url = NAVER_WORLD_INDEX_URL.format(code=naver_code)
+
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            response = requests.get(poll_url, headers=DEFAULT_HEADERS, timeout=20)
+            response.raise_for_status()
+            payload = response.json()
+            rows = payload.get("datas") or []
+            if not rows:
+                raise ValueError(f"{naver_code}: 지수 시세 데이터가 비어 있습니다.")
+
+            row = rows[0]
+            price_raw = row.get("closePriceRaw") or str(row.get("closePrice", "")).replace(",", "")
+            ratio_raw = row.get("fluctuationsRatioRaw") or row.get("fluctuationsRatio")
+            price = float(str(price_raw).replace(",", ""))
+            change_pct = float(str(ratio_raw).replace(",", ""))
+
+            return StockQuote(
+                symbol=_display_symbol(entry, naver_code),
+                name=name,
+                price=price,
+                change_pct=change_pct,
+                currency="USD",
+                link=page_url,
+            )
+        except (requests.RequestException, ValueError, json.JSONDecodeError, KeyError, TypeError) as exc:
+            last_error = exc
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+
+    if last_error:
+        raise last_error
+    raise RuntimeError(f"{naver_code} 지수 조회에 실패했습니다.")
+
+
+def _fetch_stock_quote(entry: dict[str, str]) -> StockQuote:
     """네이버 증권 해외주식 1종목 시세."""
     naver_code = _parse_naver_code(entry)
     name = entry.get("name", _display_symbol(entry, naver_code))
@@ -111,6 +158,13 @@ def fetch_quote(entry: dict[str, str]) -> StockQuote:
     raise RuntimeError(f"{naver_code} 시세 조회에 실패했습니다.")
 
 
+def fetch_quote(entry: dict[str, str]) -> StockQuote:
+    kind = entry.get("kind", "stock").strip().lower()
+    if kind == "index":
+        return _fetch_index_quote(entry)
+    return _fetch_stock_quote(entry)
+
+
 def fetch_quotes(symbols: list[dict[str, str]]) -> list[StockQuote]:
     """config의 symbols 목록 순서대로 시세를 조회합니다."""
     quotes: list[StockQuote] = []
@@ -121,9 +175,9 @@ def fetch_quotes(symbols: list[dict[str, str]]) -> list[StockQuote]:
     return quotes
 
 
-def format_kakao_body(quotes: list[StockQuote], *, as_of: str) -> str:
+def format_kakao_body(quotes: list[StockQuote]) -> str:
     """카카오 텍스트 메시지 본문 (200자 제한 고려)."""
-    lines = [as_of]
+    lines: list[str] = []
     for q in quotes:
         sign = "+" if q.change_pct >= 0 else ""
         lines.append(
