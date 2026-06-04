@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""회계사회 구인(수습CPA) 신규 공고 → 카카오톡 실시간 알림 (폴링)."""
+"""회계사회 구인(수습CPA) 신규·수정 공고 → 카카오톡 실시간 알림 (폴링)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 from src.kakao_sender import send_kicpa_job_alert
 from src.kicpa_jobs import fetch_trainee_cpa_jobs
-from src.kicpa_state import load_state, notified_id_set, save_state
+from src.kicpa_state import apply_jobs_to_snapshots, job_fingerprint, load_state, save_state
 
 
 def load_config() -> dict:
@@ -21,11 +21,14 @@ def load_config() -> dict:
 
 
 def _baseline_current_jobs(jobs_with_id: list[dict], *, reason: str) -> int:
-    seen = {j["job_id"] for j in jobs_with_id if j.get("job_id")}
-    save_state({"initialized": True, "notified_ids": sorted(seen), "needs_baseline": False})
+    state = load_state()
+    _, snapshots = apply_jobs_to_snapshots(
+        jobs_with_id, state.get("job_snapshots", {}), baseline=True
+    )
+    save_state({"initialized": True, "job_snapshots": snapshots, "needs_baseline": False})
     print(
-        f"기준선 등록 ({reason}) — 화면에 있던 {len(seen)}건은 알림 없이 등록. "
-        "이후 올라오는 공고만 카카오 알림."
+        f"기준선 등록 ({reason}) — 화면에 있던 {len(snapshots)}건 "
+        f"(job_id+제목+등록일) 저장. 이후 변경·신규만 카카오 알림."
     )
     return 0
 
@@ -40,7 +43,7 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
     jobs_with_id = [j for j in jobs if j.get("job_id")]
 
     state = load_state()
-    seen = notified_id_set(state)
+    snapshots = state.get("job_snapshots", {})
 
     if seed_only:
         return _baseline_current_jobs(jobs_with_id, reason="--seed")
@@ -51,26 +54,32 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
             reason="상태 파일 없음(캐시 미복구 — 이번 목록만 기준선)",
         )
 
-    new_jobs = [j for j in jobs_with_id if j["job_id"] not in seen]
-    if not new_jobs:
-        print("신규 공고 없음.")
+    to_notify, snapshots = apply_jobs_to_snapshots(jobs_with_id, snapshots, baseline=False)
+
+    if not to_notify:
+        print("변경·신규 공고 없음.")
         return 0
 
-    print(f"신규 {len(new_jobs)}건 감지:")
-    for job in new_jobs:
-        print(f"  - {job['company']} | {job['title'][:50]} | {job['job_id']}")
+    print(f"알림 대상 {len(to_notify)}건:")
+    for job, reason in to_notify:
+        print(
+            f"  - [{reason}] {job['company']} | {job['title'][:50]} | "
+            f"{job['job_id']} | {job_fingerprint(job)}"
+        )
 
     if dry_run:
         print("(dry-run) 카카오 발송 생략")
+        save_state({"initialized": True, "job_snapshots": snapshots, "needs_baseline": False})
         return 0
 
-    # 게시판은 최신이 위 → 오래된 순으로 알림 (읽기 순서 자연스럽게)
-    for job in reversed(new_jobs):
-        send_kicpa_job_alert(job["title"], job["link"])
-        seen.add(job["job_id"])
+    for job, reason in reversed(to_notify):
+        prefix_title = job["title"]
+        if reason == "수정·재게시":
+            prefix_title = f"[재게시] {prefix_title}"
+        send_kicpa_job_alert(prefix_title, job["link"])
 
-    save_state({"initialized": True, "notified_ids": sorted(seen), "needs_baseline": False})
-    print(f"신규 {len(new_jobs)}건 카카오톡 발송 완료.")
+    save_state({"initialized": True, "job_snapshots": snapshots, "needs_baseline": False})
+    print(f"카카오톡 {len(to_notify)}건 발송 완료.")
     return 0
 
 
