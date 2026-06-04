@@ -134,7 +134,7 @@ def send_pwc_recruitment_alert(title: str, link: str) -> None:
 def send_stock_quotes_alert(body: str, *, link: str | None = None) -> None:
     """테슬라·엔비디아 등 미국 주식 시세 — 나에게 보내기."""
     send_link_alert(
-        "[미국주식]",
+        "<주가보고>",
         body,
         link or "https://m.stock.naver.com/worldstock/home",
         button_title="네이버 증권",

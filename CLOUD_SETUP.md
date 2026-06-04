@@ -71,7 +71,7 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 
 GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
 
-1~2분 후 카카오톡 **나와의 채팅**에 `[미국주식]` 메시지 (가격 + 전일 대비 %).
+1~2분 후 카카오톡 **나와의 채팅**에 `<주가보고>` 메시지 (가격 + 전일 대비 %).
 
 - 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
 - 카카오 **제품 링크 관리** 웹 도메인: `https://m.stock.naver.com`
