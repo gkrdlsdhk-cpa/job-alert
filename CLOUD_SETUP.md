@@ -76,7 +76,8 @@ GitHub → **Actions** → **Realtime Job Alerts** → **Run workflow**
 | 회계사회 구인(수습CPA) | 신규 공고 등록 | `[회계사회 수습CPA 신규]` + 공고 보기 |
 | 삼일PwC 정기채용 | 모집 오픈(지원 링크·모집 중 문구 등장) | `[삼일PwC 정기채용]` + 채용 보기 |
 
-- **첫 실행**: 현재 상태만 등록 (스팸 방지)
+- **첫 실행(또는 캐시 없음)**: 그때 목록에 있던 공고만 등록 (알림 없음). **그 직후 올라온 글부터** 알림
+- 놓친 공고가 있으면 Actions 로그에 `기준선 등록` / `신규 N건` 확인
 - **이후 ~10분마다** 자동 확인
 - 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
 - 카카오 **제품 링크 관리** 웹 도메인: `https://www.kicpa.or.kr`, `https://www.pwc.com`

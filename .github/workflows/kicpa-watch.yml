@@ -23,14 +23,18 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Prepare data directory
+        run: mkdir -p data
+
       - name: Restore watch state
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             data/kicpa_notified.json
             data/pwc_graduate_state.json
-          key: job-alert-watch-state-v1
+          key: job-alert-watch-state-v2
           restore-keys: |
+            job-alert-watch-state-v2
             job-alert-watch-state-v1
 
       - name: Check Kakao Secrets
@@ -67,3 +71,12 @@ jobs:
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
           KAKAO_REDIRECT_URI: http://localhost:8080
         run: python pwc_watch.py
+
+      - name: Save watch state
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            data/kicpa_notified.json
+            data/pwc_graduate_state.json
+          key: job-alert-watch-state-v2

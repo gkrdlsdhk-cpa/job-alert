@@ -18,14 +18,16 @@ def state_path() -> Path:
 def load_state() -> dict:
     path = state_path()
     if not path.is_file():
-        return {"initialized": False, "notified_ids": []}
+        # 상태 파일 없음(캐시 미복구 등) — 재-seed 시 신규 공고까지 알림 누락 방지
+        return {"initialized": True, "notified_ids": [], "needs_baseline": True}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
-        return {"initialized": False, "notified_ids": []}
+        return {"initialized": True, "notified_ids": [], "needs_baseline": True}
     if not isinstance(data.get("notified_ids"), list):
         data["notified_ids"] = []
-    data.setdefault("initialized", bool(data["notified_ids"]))
+    data.setdefault("initialized", True)
+    data.setdefault("needs_baseline", False)
     return data
 
 
@@ -36,7 +38,7 @@ def save_state(state: dict) -> None:
     if len(ids) > MAX_STORED_IDS:
         ids = ids[-MAX_STORED_IDS:]
     payload = {
-        "initialized": bool(state.get("initialized")),
+        "initialized": True,
         "notified_ids": ids,
     }
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
