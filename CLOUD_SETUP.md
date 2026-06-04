@@ -67,6 +67,15 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 - **Gmail** `[취업 브리핑]` 메일 (뉴스 + 사람인)
 - **카카오톡** 「Gmail 확인」 알림 (`NOTIFY_VIA=both` 또는 `kakao`일 때)
 
+### 매일 9시 미국 주식 시세 (테슬라·엔비디아)
+
+GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
+
+1~2분 후 카카오톡 **나와의 채팅**에 `[미국주식]` 메시지 (가격 + 전일 대비 %).
+
+- 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
+- 카카오 **제품 링크 관리** 웹 도메인: `https://finance.yahoo.com`
+
 ### 실시간 카카오 알림 (회계사회 + 삼일PwC 정기채용)
 
 GitHub → **Actions** → **Realtime Job Alerts** → **Run workflow**

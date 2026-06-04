@@ -97,7 +97,7 @@ python main.py
 
 ---
 
-## 8. 매일 오전 9시 자동 실행 (Mac)
+## 8. 매일 오후 12시 자동 실행 (Mac)
 
 ### 8-1. 로그 폴더 만들기
 
@@ -244,6 +244,48 @@ Mac을 끄거나 잠자기 상태여도 **GitHub 서버**에서 매일 **한국 
 
 ---
 
+## 12. 매일 오전 9시 미국 주식 시세 (카카오)
+
+**테슬라(TSLA)·엔비디아(NVDA)** 시세를 카카오톡 **나와의 채팅**으로 보냅니다. (Yahoo Finance 시세, 전일 대비 등락률)
+
+### 12-1. 필요한 설정
+
+- `.env`에 `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN` (README 9번과 동일)
+- [Kakao Developers](https://developers.kakao.com) → **제품 링크 관리** → 웹 도메인: `https://finance.yahoo.com`
+
+### 12-2. 테스트
+
+```bash
+cd ~/job-alert
+source .venv/bin/activate
+python stock_alert.py
+```
+
+예시 메시지:
+
+```text
+[미국주식]
+06/04 09:00
+테슬라(TSLA) $423.70 +1.88%
+엔비디아(NVDA) $214.75 -4.28%
+```
+
+### 12-3. Mac에서 매일 9시 (선택)
+
+```bash
+cp ~/job-alert/com.jobalert.stock.plist.example ~/Library/LaunchAgents/com.jobalert.stock.plist
+launchctl load ~/Library/LaunchAgents/com.jobalert.stock.plist
+```
+
+### 12-4. Mac 꺼져 있어도 (GitHub Actions)
+
+GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**  
+(스케줄: 한국 시간 **매일 09:00**, Secret은 카카오 2개만 필요 — `CLOUD_SETUP.md` 4번)
+
+종목 변경은 `config.yaml` → `stock_alert.symbols` 에서 수정합니다.
+
+---
+
 ## 다음 단계 (나중에)
 
 - [ ] 구글 뉴스 API 추가
@@ -251,5 +293,6 @@ Mac을 끄거나 잠자기 상태여도 **GitHub 서버**에서 매일 **한국 
 - [x] 한국공인회계사회 구인(수습CPA) — 실시간 카카오 알림
 - [x] 카카오톡 "나에게 보내기" 연동
 - [x] 클라우드(GitHub Actions)로 24시간 스케줄 — 설정은 `CLOUD_SETUP.md`
+- [x] 매일 9시 테슬라·엔비디아 주가 카카오 알림
 
 궁금한 점은 Cursor 채팅에서 **"job-alert README 3번 도와줘"** 처럼 단계 번호와 함께 물어보세요.

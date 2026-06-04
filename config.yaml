@@ -39,3 +39,11 @@ kicpa:
 pwc:
   watch_url: https://pwc.to/2xLHIx4
   poll_minutes: 15
+
+# 미국 주식 시세 — 매일 9시 카카오 알림 (stock_alert.py)
+stock_alert:
+  symbols:
+    - symbol: TSLA
+      name: 테슬라
+    - symbol: NVDA
+      name: 엔비디아

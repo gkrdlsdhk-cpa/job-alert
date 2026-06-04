@@ -131,6 +131,16 @@ def send_pwc_recruitment_alert(title: str, link: str) -> None:
     send_link_alert("[삼일PwC 정기채용]", title, link, button_title="채용 보기")
 
 
+def send_stock_quotes_alert(body: str) -> None:
+    """테슬라·엔비디아 등 미국 주식 시세 — 나에게 보내기."""
+    send_link_alert(
+        "[미국주식]",
+        body,
+        "https://finance.yahoo.com/",
+        button_title="Yahoo Finance",
+    )
+
+
 def send_notification(email_to: str) -> None:
     """Gmail 브리핑 링크가 포함된 카카오 알림 1통."""
     access_token = get_access_token()
