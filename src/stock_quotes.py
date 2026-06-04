@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 
 import requests
@@ -48,18 +49,32 @@ def _quote_from_meta(symbol: str, name: str, meta: dict) -> StockQuote:
 
 
 def _fetch_spark_json(symbols: list[str]) -> dict:
-    response = requests.get(
-        YAHOO_SPARK_URL,
-        params={
-            "symbols": ",".join(symbols),
-            "range": "2d",
-            "interval": "1d",
-        },
-        headers=DEFAULT_HEADERS,
-        timeout=15,
-    )
-    response.raise_for_status()
-    return response.json()
+    params = {
+        "symbols": ",".join(symbols),
+        "range": "2d",
+        "interval": "1d",
+    }
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            response = requests.get(
+                YAHOO_SPARK_URL,
+                params=params,
+                headers=DEFAULT_HEADERS,
+                timeout=15,
+            )
+            if response.status_code == 429 and attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as exc:
+            last_error = exc
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1))
+    if last_error:
+        raise last_error
+    raise RuntimeError("Yahoo Finance 시세 조회에 실패했습니다.")
 
 
 def _fetch_chart_json(symbol: str) -> dict:
@@ -103,25 +118,24 @@ def fetch_quotes(symbols: list[dict[str, str]]) -> list[StockQuote]:
     }
     ordered_symbols = [entry["symbol"].upper() for entry in symbols]
 
-    try:
-        payload = _fetch_spark_json(ordered_symbols)
-        spark_result = payload.get("spark", {}).get("result") or []
-        by_symbol: dict[str, StockQuote] = {}
-        for item in spark_result:
-            symbol = str(item.get("symbol", "")).upper()
-            responses = item.get("response") or []
-            if not symbol or not responses:
-                continue
-            meta = responses[0].get("meta", {})
-            by_symbol[symbol] = _quote_from_meta(symbol, names[symbol], meta)
+    payload = _fetch_spark_json(ordered_symbols)
+    spark_result = payload.get("spark", {}).get("result") or []
+    by_symbol: dict[str, StockQuote] = {}
+    for item in spark_result:
+        symbol = str(item.get("symbol", "")).upper()
+        responses = item.get("response") or []
+        if not symbol or not responses:
+            continue
+        meta = responses[0].get("meta", {})
+        by_symbol[symbol] = _quote_from_meta(symbol, names[symbol], meta)
 
-        quotes: list[StockQuote] = []
-        for symbol in ordered_symbols:
-            if symbol in by_symbol:
-                quotes.append(by_symbol[symbol])
-            else:
-                quotes.append(_fetch_quote_fallback(symbol, names[symbol]))
-        return quotes
+    quotes: list[StockQuote] = []
+    for symbol in ordered_symbols:
+        if symbol in by_symbol:
+            quotes.append(by_symbol[symbol])
+        else:
+            quotes.append(_fetch_quote_fallback(symbol, names[symbol]))
+    return quotes
 
 
 def format_kakao_body(quotes: list[StockQuote], *, as_of: str) -> str:
