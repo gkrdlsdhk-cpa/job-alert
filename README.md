@@ -246,12 +246,12 @@ Mac을 끄거나 잠자기 상태여도 **GitHub 서버**에서 매일 **한국 
 
 ## 12. 매일 오전 9시 미국 주식 시세 (카카오)
 
-**테슬라(TSLA)·엔비디아(NVDA)** 시세를 카카오톡 **나와의 채팅**으로 보냅니다. (Yahoo Finance 시세, 전일 대비 등락률)
+**테슬라(TSLA)·엔비디아(NVDA)** 시세를 카카오톡 **나와의 채팅**으로 보냅니다. (네이버 증권 해외주식, 전일 대비 등락률)
 
 ### 12-1. 필요한 설정
 
 - `.env`에 `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN` (README 9번과 동일)
-- [Kakao Developers](https://developers.kakao.com) → **제품 링크 관리** → 웹 도메인: `https://finance.yahoo.com`
+- [Kakao Developers](https://developers.kakao.com) → **제품 링크 관리** → 웹 도메인: `https://m.stock.naver.com` (또는 `https://stock.naver.com`)
 
 ### 12-2. 테스트
 
@@ -282,7 +282,7 @@ launchctl load ~/Library/LaunchAgents/com.jobalert.stock.plist
 GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**  
 (스케줄: 한국 시간 **매일 09:00**, Secret은 카카오 2개만 필요 — `CLOUD_SETUP.md` 4번)
 
-종목 변경은 `config.yaml` → `stock_alert.symbols` 에서 수정합니다.
+종목 변경은 `config.yaml` → `stock_alert.symbols` 에서 `naver_code`(예: `TSLA.O`)를 수정합니다.
 
 ---
 

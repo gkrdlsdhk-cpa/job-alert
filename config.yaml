@@ -40,10 +40,12 @@ pwc:
   watch_url: https://pwc.to/2xLHIx4
   poll_minutes: 15
 
-# 미국 주식 시세 — 매일 9시 카카오 알림 (stock_alert.py)
+# 미국 주식 시세 — 매일 9시 카카오 알림 (stock_alert.py, 네이버 증권 해외주식)
 stock_alert:
   symbols:
-    - symbol: TSLA
+    - naver_code: TSLA.O
       name: 테슬라
-    - symbol: NVDA
+      symbol: TSLA
+    - naver_code: NVDA.O
       name: 엔비디아
+      symbol: NVDA

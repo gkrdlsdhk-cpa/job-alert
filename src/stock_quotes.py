@@ -1,22 +1,22 @@
-"""Yahoo Finance API로 미국 주식 시세를 조회합니다."""
+"""네이버 증권 해외주식 페이지에서 미국 주식 시세를 조회합니다."""
 
 from __future__ import annotations
 
+import json
+import re
 import time
 from dataclasses import dataclass
+from typing import Any
 
 import requests
 
-YAHOO_SPARK_URL = "https://query1.finance.yahoo.com/v7/finance/spark"
-YAHOO_CHART_URLS = (
-    "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
-    "https://query2.finance.yahoo.com/v8/finance/chart/{symbol}",
-)
+NAVER_WORLD_STOCK_URL = "https://m.stock.naver.com/worldstock/stock/{code}/total"
 DEFAULT_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     ),
+    "Accept-Language": "ko-KR,ko;q=0.9",
 }
 
 
@@ -27,114 +27,97 @@ class StockQuote:
     price: float
     change_pct: float
     currency: str
+    link: str
 
 
-def _quote_from_meta(symbol: str, name: str, meta: dict) -> StockQuote:
-    price = meta.get("regularMarketPrice")
-    previous = meta.get("chartPreviousClose") or meta.get("previousClose")
-    if price is None:
-        raise ValueError(f"{symbol} 현재가를 찾을 수 없습니다.")
-
-    change_pct = 0.0
-    if previous:
-        change_pct = (float(price) - float(previous)) / float(previous) * 100
-
-    return StockQuote(
-        symbol=symbol.upper(),
-        name=name,
-        price=float(price),
-        change_pct=change_pct,
-        currency=str(meta.get("currency", "USD")),
-    )
+def _find_stock_payload(data: Any) -> dict[str, Any] | None:
+    """__NEXT_DATA__ 안에서 closePrice·fluctuationsRatio가 있는 객체를 찾습니다."""
+    if isinstance(data, dict):
+        if "closePrice" in data and "fluctuationsRatio" in data:
+            return data
+        for value in data.values():
+            found = _find_stock_payload(value)
+            if found:
+                return found
+    elif isinstance(data, list):
+        for item in data:
+            found = _find_stock_payload(item)
+            if found:
+                return found
+    return None
 
 
-def _fetch_spark_json(symbols: list[str]) -> dict:
-    params = {
-        "symbols": ",".join(symbols),
-        "range": "2d",
-        "interval": "1d",
-    }
+def _parse_naver_code(entry: dict[str, str]) -> str:
+    code = entry.get("naver_code", "").strip().upper()
+    if code:
+        return code
+    symbol = entry.get("symbol", "").strip().upper()
+    if not symbol:
+        raise ValueError("stock_alert 항목에 naver_code 또는 symbol이 필요합니다.")
+    return f"{symbol}.O" if "." not in symbol else symbol
+
+
+def _display_symbol(entry: dict[str, str], naver_code: str) -> str:
+    symbol = entry.get("symbol", "").strip().upper()
+    if symbol:
+        return symbol
+    return naver_code.split(".", 1)[0]
+
+
+def fetch_quote(entry: dict[str, str]) -> StockQuote:
+    """네이버 증권 해외주식 1종목 시세."""
+    naver_code = _parse_naver_code(entry)
+    name = entry.get("name", _display_symbol(entry, naver_code))
+    url = NAVER_WORLD_STOCK_URL.format(code=naver_code)
+
     last_error: Exception | None = None
     for attempt in range(3):
         try:
-            response = requests.get(
-                YAHOO_SPARK_URL,
-                params=params,
-                headers=DEFAULT_HEADERS,
-                timeout=15,
-            )
-            if response.status_code == 429 and attempt < 2:
-                time.sleep(2 * (attempt + 1))
-                continue
+            response = requests.get(url, headers=DEFAULT_HEADERS, timeout=20)
             response.raise_for_status()
-            return response.json()
-        except requests.RequestException as exc:
+            match = re.search(
+                r'<script id="__NEXT_DATA__"[^>]*>(.+?)</script>',
+                response.text,
+                re.DOTALL,
+            )
+            if not match:
+                raise ValueError(f"{naver_code}: 시세 데이터(JSON)를 찾을 수 없습니다.")
+
+            page_data = json.loads(match.group(1))
+            stock = _find_stock_payload(page_data.get("props", {}).get("pageProps", {}))
+            if not stock:
+                raise ValueError(f"{naver_code}: 종목 시세 필드를 찾을 수 없습니다.")
+
+            price = float(str(stock["closePrice"]).replace(",", ""))
+            change_pct = float(str(stock["fluctuationsRatio"]).replace(",", ""))
+            currency = str(stock.get("currencyType", {}).get("code", "USD"))
+
+            page_link = str(stock.get("newPcUrl") or stock.get("endUrl") or url)
+            return StockQuote(
+                symbol=_display_symbol(entry, naver_code),
+                name=str(stock.get("stockName") or name),
+                price=price,
+                change_pct=change_pct,
+                currency=currency,
+                link=page_link,
+            )
+        except (requests.RequestException, ValueError, json.JSONDecodeError, KeyError) as exc:
             last_error = exc
             if attempt < 2:
-                time.sleep(2 * (attempt + 1))
+                time.sleep(1.5 * (attempt + 1))
+
     if last_error:
         raise last_error
-    raise RuntimeError("Yahoo Finance 시세 조회에 실패했습니다.")
-
-
-def _fetch_chart_json(symbol: str) -> dict:
-    """Yahoo chart API (spark 실패 시 종목별 폴백)."""
-    params = {"interval": "1d", "range": "2d"}
-    last_error: Exception | None = None
-    for url_template in YAHOO_CHART_URLS:
-        url = url_template.format(symbol=symbol.upper())
-        try:
-            response = requests.get(
-                url,
-                params=params,
-                headers=DEFAULT_HEADERS,
-                timeout=15,
-            )
-            response.raise_for_status()
-            return response.json()
-        except requests.RequestException as exc:
-            last_error = exc
-    if last_error:
-        raise last_error
-    raise RuntimeError(f"{symbol} 시세 조회에 실패했습니다.")
-
-
-def _fetch_quote_fallback(symbol: str, name: str) -> StockQuote:
-    payload = _fetch_chart_json(symbol)
-    result = payload.get("chart", {}).get("result")
-    if not result:
-        raise ValueError(f"{symbol} 시세 데이터를 찾을 수 없습니다.")
-    return _quote_from_meta(symbol, name, result[0].get("meta", {}))
+    raise RuntimeError(f"{naver_code} 시세 조회에 실패했습니다.")
 
 
 def fetch_quotes(symbols: list[dict[str, str]]) -> list[StockQuote]:
-    """config의 symbols 목록 순서대로 시세를 조회합니다 (한 번에 요청)."""
-    if not symbols:
-        return []
-
-    names = {
-        entry["symbol"].upper(): entry.get("name", entry["symbol"])
-        for entry in symbols
-    }
-    ordered_symbols = [entry["symbol"].upper() for entry in symbols]
-
-    payload = _fetch_spark_json(ordered_symbols)
-    spark_result = payload.get("spark", {}).get("result") or []
-    by_symbol: dict[str, StockQuote] = {}
-    for item in spark_result:
-        symbol = str(item.get("symbol", "")).upper()
-        responses = item.get("response") or []
-        if not symbol or not responses:
-            continue
-        meta = responses[0].get("meta", {})
-        by_symbol[symbol] = _quote_from_meta(symbol, names[symbol], meta)
-
+    """config의 symbols 목록 순서대로 시세를 조회합니다."""
     quotes: list[StockQuote] = []
-    for symbol in ordered_symbols:
-        if symbol in by_symbol:
-            quotes.append(by_symbol[symbol])
-        else:
-            quotes.append(_fetch_quote_fallback(symbol, names[symbol]))
+    for index, entry in enumerate(symbols):
+        if index:
+            time.sleep(0.5)
+        quotes.append(fetch_quote(entry))
     return quotes
 
 

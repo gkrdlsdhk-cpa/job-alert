@@ -42,7 +42,7 @@ def main() -> int:
 
     body = format_kakao_body(quotes, as_of=as_of)
     print("카카오톡 발송 중...")
-    send_stock_quotes_alert(body)
+    send_stock_quotes_alert(body, link=quotes[0].link if quotes else None)
     print("완료!")
     return 0
 
