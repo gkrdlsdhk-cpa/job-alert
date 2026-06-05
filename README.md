@@ -280,10 +280,9 @@ launchctl load ~/Library/LaunchAgents/com.jobalert.stock.plist
 ### 12-4. Mac 꺼져 있어도 (GitHub Actions)
 
 GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**  
-(스케줄: 한국 시간 **매일 09:00**, Secret은 카카오 2개만 필요 — `CLOUD_SETUP.md` 4번)
+(매일 **09:00 KST** 자동: `CLOUD_SETUP.md` **7번** cron-job.org 권장, Secret은 카카오 2개)
 
-> **9시 스케줄이 안 돌 때:** **Realtime Job Alerts**(10분마다)가 9시대에 **주가보고 백업**을 시도합니다.  
-> Actions 목록에 `schedule` 없이 `Manually run`만 보이면, 워크플로를 **Run workflow**로 한 번 켜 두거나 아래 push 후 내일 9시를 확인하세요.
+> **백업:** GitHub **09:30** cron + 평일 **Realtime Job Alerts** 9시대 `stock_daily_guard` (하루 1회)
 
 종목 변경은 `config.yaml` → `stock_alert.symbols` 에서 `naver_code`(예: `TSLA.O`)를 수정합니다.
 

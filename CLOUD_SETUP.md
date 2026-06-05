@@ -67,7 +67,7 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 - **Gmail** `[취업 브리핑]` 메일 (뉴스 + 사람인)
 - **카카오톡** 「Gmail 확인」 알림 (`NOTIFY_VIA=both` 또는 `kakao`일 때)
 
-### 매일 9시 미국 주식 시세 (테슬라·엔비디아)
+### 매일 9시 미국 주식 시세 (나스닥·테슬라·엔비디아)
 
 GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
 
@@ -75,6 +75,7 @@ GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
 
 - 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
 - 카카오 **제품 링크 관리** 웹 도메인: `https://m.stock.naver.com`
+- **매일 09:00 KST** 자동 실행 → **§7 cron-job.org** 권장 (GitHub 내장 9시 cron은 자주 스킵됨)
 
 ### 실시간 카카오 알림 (회계사회 + 삼일PwC 정기채용)
 
@@ -126,7 +127,7 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-realt
 |------|-----|
 | **Title** | job-alert realtime |
 | **URL** | `https://api.github.com/repos/gkrdlsdhk-cpa/job-alert/actions/workflows/kicpa-watch.yml/dispatches` |
-| **Schedule** | Every **10** minutes (또는 cron `*/10 * * * *`) |
+| **Schedule** | 평일만: cron `*/10 * * * 1-5` / 주말 포함: `*/10 * * * *` |
 | **Request method** | **POST** |
 | **Headers** | `Accept: application/vnd.github+json` |
 | | `Authorization: Bearer github_pat_여기에_토큰` |
@@ -147,6 +148,50 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-realt
 - 토큰 유출 시 GitHub에서 **즉시 폐기** 후 cron-job.org 헤더 갱신
 - 무료 플랜으로도 10분 주기 가능 (cron-job.org 기준)
 - 월 Actions 사용량: 10분마다 ≈ 하루 144회 × ~20초 — 개인 private 저장소 무료 한도 안이면 충분
+
+---
+
+## 7. 주가보고 9시 — cron-job.org (권장)
+
+GitHub Actions `schedule`만으로는 **9시에 안 오는** 경우가 많습니다.  
+**cron-job.org**에서 **매일 09:00 (KST)** 에 `Morning Stock Alert`를 호출하면 정시에 가깝게 동작합니다.
+
+> 실시간 알림(§6)과 **같은 PAT**를 쓸 수 있습니다. cron-job **잡을 하나 더** 만드세요.
+
+### 7-1. 로컬 테스트 (선택)
+
+```bash
+chmod +x ~/job-alert/scripts/trigger-stock-alert.sh
+GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-stock-alert.sh
+```
+
+### 7-2. cron-job.org — 두 번째 cronjob
+
+1. **Cronjobs** → **Create cronjob**
+2. 아래처럼 입력 (§6과 동일한 **ADVANCED** 설정: POST, 헤더, body)
+
+| 항목 | 값 |
+|------|-----|
+| **Title** | `job alert stock 9am` |
+| **URL** | `https://api.github.com/repos/gkrdlsdhk-cpa/job-alert/actions/workflows/stock-alert.yml/dispatches` |
+| **Schedule** | Custom crontab: `0 9 * * *` |
+| **Time zone** | `Asia/Seoul` |
+| **Request method** | **POST** |
+| **Headers** | §6과 동일 (`Accept`, `Authorization`, `X-GitHub-Api-Version`, `Content-Type`) |
+| **Request body** | `{"ref":"main"}` |
+
+3. **SAVE** → **TEST RUN** → `204` 확인
+
+### 7-3. 백업
+
+- GitHub 워크플로에 **09:30 KST** 백업 cron 1개 유지 (`30 0 * * *` UTC)
+- 평일 9시대 **Realtime Job Alerts**가 돌면 `stock_daily_guard`가 **하루 1회** 추가 백업 시도
+- `stock_daily_sent.json`으로 **당일 중복 카톡** 방지
+
+### 7-4. 주말
+
+- 주가 알림은 **매일 9시** (`0 9 * * *`) — 주말에도 전일 종가 기준으로 보냄
+- 실시간 공고(§6)만 평일(`1-5`)로 끄면 됨
 
 ---
 

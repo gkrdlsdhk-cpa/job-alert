@@ -1,12 +1,11 @@
 name: Morning Stock Alert
 
 on:
-  schedule:
-    # 한국 시간 매일 09:00 (KST = UTC+9 → 00:00 UTC)
-    - cron: "0 0 * * *"
-    # 백업: 09:30 KST (스케줄 지연·미실행 대비)
-    - cron: "30 0 * * *"
+  # 매일 09:00 KST: cron-job.org가 workflow_dispatch 호출 (CLOUD_SETUP.md §7)
   workflow_dispatch:
+  schedule:
+    # 외부 스케줄러 장애 시 백업 (09:30 KST = 00:30 UTC)
+    - cron: "30 0 * * *"
 
 permissions:
   contents: read
