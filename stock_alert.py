@@ -10,7 +10,7 @@ import yaml
 from dotenv import load_dotenv
 
 from src.kakao_sender import send_stock_quotes_alert
-from src.stock_daily_guard import mark_sent_today
+from src.stock_daily_guard import already_sent_today, mark_sent_today
 from src.stock_quotes import fetch_quotes, format_kakao_body
 
 
@@ -21,7 +21,11 @@ def load_config() -> dict:
 
 
 def deliver_stock_alert() -> None:
-    """시세 조회 후 카카오 발송."""
+    """시세 조회 후 카카오 발송 (하루 1회)."""
+    if already_sent_today():
+        print("주가보고: 오늘 이미 발송함 — 건너뜀.")
+        return
+
     config = load_config()
     stock_cfg = config.get("stock_alert", {})
     symbols = stock_cfg.get("symbols")

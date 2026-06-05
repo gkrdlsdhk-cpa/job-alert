@@ -282,7 +282,7 @@ launchctl load ~/Library/LaunchAgents/com.jobalert.stock.plist
 GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**  
 (매일 **09:00 KST** 자동: `CLOUD_SETUP.md` **7번** cron-job.org 권장, Secret은 카카오 2개)
 
-> **백업:** GitHub **09:30** cron + 평일 **Realtime Job Alerts** 9시대 `stock_daily_guard` (하루 1회)
+> **백업:** 평일 9시대 **Realtime Job Alerts** → `stock_daily_guard` (cron-job 실패 시, 하루 1회)
 
 종목 변경은 `config.yaml` → `stock_alert.symbols` 에서 `naver_code`(예: `TSLA.O`)를 수정합니다.
 
