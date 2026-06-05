@@ -230,11 +230,11 @@ python pwc_watch.py          # 테스트
 
 ## 11. Mac이 꺼져 있어도 매일 12시 자동 실행 (클라우드)
 
-Mac을 끄거나 잠자기 상태여도 **GitHub 서버**에서 매일 **한국 시간 12:00**에 브리핑을 보냅니다.
+Mac을 끄거나 잠자기 상태여도 **cron-job.org**가 매일 **한국 시간 12:00**에 브리핑을 보냅니다 (`CLOUD_SETUP.md` **8번**).
 
 1. 코드는 이미 GitHub에 올라가 있음: https://github.com/gkrdlsdhk-cpa/job-alert  
 2. **`CLOUD_SETUP.md`** 를 열고 **3번 GitHub Secrets**를 `.env` 값대로 **하나씩** 등록  
-3. GitHub → **Actions** → **Daily Job Briefing** → **Run workflow** 로 테스트  
+3. **§8** cron-job `job alert briefing 12pm` 등록 후 **TEST RUN** (`204`)  
 4. 클라우드만 쓸 거면 Mac 12시 스케줄 끄기 (`CLOUD_SETUP.md` 5번)
 
 | Mac 스케줄 (8번) | GitHub Actions (10번) |

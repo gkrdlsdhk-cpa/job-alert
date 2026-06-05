@@ -1,9 +1,7 @@
 name: Daily Job Briefing
 
 on:
-  schedule:
-    # 한국 시간 매일 12:00 (KST = UTC+9 → 03:00 UTC)
-    - cron: "0 3 * * *"
+  # 매일 12:00 KST: cron-job.org가 workflow_dispatch 호출 (CLOUD_SETUP.md §8)
   workflow_dispatch:
 
 jobs:

@@ -1,6 +1,6 @@
 # 클라oud로 매일 12시 자동 발송 (GitHub Actions)
 
-Mac이 꺼져 있어도 **GitHub 서버**에서 매일 **한국 시간 12:00**에 `main.py`를 실행합니다.
+Mac이 꺼져 있어도 **cron-job.org**가 매일 **한국 시간 12:00**에 GitHub Actions로 `main.py`를 실행합니다.
 
 ---
 
@@ -66,6 +66,8 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 1~2분 후:
 - **Gmail** `[취업 브리핑]` 메일 (뉴스 + 사람인)
 - **카카오톡** 「Gmail 확인」 알림 (`NOTIFY_VIA=both` 또는 `kakao`일 때)
+
+- **매일 12:00 KST** 자동 실행 → **§8 cron-job.org** 권장
 
 ### 매일 9시 미국 주식 시세 (나스닥·테슬라·엔비디아)
 
@@ -192,6 +194,46 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-stock
 
 - 주가 알림은 **매일 9시** (`0 9 * * *`) — 주말에도 전일 종가 기준으로 보냄
 - 실시간 공고(§6)만 평일(`1-5`)로 끄면 됨
+
+---
+
+## 8. 취업 브리핑 12시 — cron-job.org (권장)
+
+GitHub 내장 12시 cron은 **몇 시간 늦게** 돌 수 있습니다.  
+**cron-job.org**에서 **매일 12:00 (KST)** 에 `Daily Job Briefing`을 호출하세요.
+
+> **같은 PAT** 사용. cron-job **잡을 하나 더** 만듭니다 (총 3개: 실시간·주가·브리핑).
+
+### 8-1. 로컬 테스트 (선택)
+
+```bash
+chmod +x ~/job-alert/scripts/trigger-daily-briefing.sh
+GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-daily-briefing.sh
+```
+
+### 8-2. cron-job.org — 세 번째 cronjob
+
+| 항목 | 값 |
+|------|-----|
+| **Title** | `job alert briefing 12pm` |
+| **URL** | `https://api.github.com/repos/gkrdlsdhk-cpa/job-alert/actions/workflows/daily-briefing.yml/dispatches` |
+| **Schedule** | Custom crontab: `0 12 * * *` |
+| **Time zone** | `Asia/Seoul` |
+| **Request method** | **POST** |
+| **Headers** | §6과 동일 |
+| **Request body** | `{"ref":"main"}` |
+
+**SAVE** → **TEST RUN** → `204` → Actions에 **Daily Job Briefing** 1회 확인.
+
+### 8-3. cron-job 3개 요약
+
+| Title | Schedule (KST) | 워크플로 |
+|-------|----------------|----------|
+| job alert realtime | `*/10 * * * 1-5` (평일 10분) | `kicpa-watch.yml` |
+| job alert stock 9am | `0 9 * * *` (매일 9시) | `stock-alert.yml` |
+| job alert briefing 12pm | `0 12 * * *` (매일 12시) | `daily-briefing.yml` |
+
+브리핑 **카톡만 끄려면** GitHub Secret `NOTIFY_VIA` → `email`.
 
 ---
 
