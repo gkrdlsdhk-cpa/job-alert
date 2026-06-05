@@ -10,6 +10,7 @@ import yaml
 from dotenv import load_dotenv
 
 from src.kakao_sender import send_stock_quotes_alert
+from src.stock_daily_guard import mark_sent_today
 from src.stock_quotes import fetch_quotes, format_kakao_body
 
 
@@ -19,8 +20,8 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
-def main() -> int:
-    load_dotenv()
+def deliver_stock_alert() -> None:
+    """시세 조회 후 카카오 발송."""
     config = load_config()
     stock_cfg = config.get("stock_alert", {})
     symbols = stock_cfg.get("symbols")
@@ -36,13 +37,19 @@ def main() -> int:
     body = format_kakao_body(quotes)
     print("카카오톡 발송 중...")
     send_stock_quotes_alert(body, link=quotes[0].link if quotes else None)
+    mark_sent_today()
     print("완료!")
-    return 0
+
+
+def main() -> int:
+    load_dotenv()
+    try:
+        deliver_stock_alert()
+        return 0
+    except Exception as exc:
+        print(f"오류: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    try:
-        raise SystemExit(main())
-    except Exception as exc:
-        print(f"오류: {exc}", file=sys.stderr)
-        raise SystemExit(1) from exc
+    raise SystemExit(main())

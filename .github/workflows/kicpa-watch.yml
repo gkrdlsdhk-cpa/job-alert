@@ -32,10 +32,12 @@ jobs:
           path: |
             data/kicpa_notified.json
             data/pwc_graduate_state.json
+            data/stock_daily_sent.json
           key: job-alert-watch-state-v2
           restore-keys: |
             job-alert-watch-state-v2
             job-alert-watch-state-v1
+            job-alert-stock-daily-v1
 
       - name: Check Kakao Secrets
         env:
@@ -56,6 +58,7 @@ jobs:
 
       - name: Watch KICPA trainee CPA jobs
         env:
+          STOCK_DAILY_STATE_FILE: data/stock_daily_sent.json
           KICPA_STATE_FILE: data/kicpa_notified.json
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
@@ -79,4 +82,5 @@ jobs:
           path: |
             data/kicpa_notified.json
             data/pwc_graduate_state.json
+            data/stock_daily_sent.json
           key: job-alert-watch-state-v2

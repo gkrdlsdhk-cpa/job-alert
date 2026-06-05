@@ -4,7 +4,12 @@ on:
   schedule:
     # 한국 시간 매일 09:00 (KST = UTC+9 → 00:00 UTC)
     - cron: "0 0 * * *"
+    # 백업: 09:30 KST (스케줄 지연·미실행 대비)
+    - cron: "30 0 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   stock-alert:
@@ -22,6 +27,15 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Prepare data directory
+        run: mkdir -p data
+
+      - name: Restore stock daily state
+        uses: actions/cache/restore@v4
+        with:
+          path: data/stock_daily_sent.json
+          key: job-alert-stock-daily-v1
 
       - name: Check Kakao Secrets
         env:
@@ -43,8 +57,16 @@ jobs:
 
       - name: Send stock quotes to Kakao
         env:
+          STOCK_DAILY_STATE_FILE: data/stock_daily_sent.json
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
           KAKAO_REDIRECT_URI: http://localhost:8080
         run: python stock_alert.py
+
+      - name: Save stock daily state
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: data/stock_daily_sent.json
+          key: job-alert-stock-daily-v1
