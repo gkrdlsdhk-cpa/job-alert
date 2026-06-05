@@ -224,7 +224,7 @@ python pwc_watch.py          # 테스트
 
 ### 10-5. Mac 꺼져 있어도 (GitHub Actions)
 
-`CLOUD_SETUP.md` 4번 — **Realtime Job Alerts** (~10분마다, 회계사회 + PwC)
+`CLOUD_SETUP.md` **6번** — **Realtime Job Alerts** (외부 cron 10분, Mac 없을 때) / 4번 — 수동 테스트
 
 ---
 
