@@ -56,6 +56,12 @@ stock_alert:
       name: 엔비디아
       symbol: NVDA
 
+# TaxWatch 세금 뉴스 — 당일 최신뉴스 Gmail 브리핑 + 텔레그램 (taxwatch_briefing.py)
+# 자동 실행: cron-job.org 매일 23:00 KST → taxwatch-briefing.yml (CLOUD_SETUP.md §8-4)
+taxwatch_briefing:
+  channel: telegram
+  max_pages: 30
+
 # 복약 알림 — 매일 9시 (cron-job.org, CLOUD_SETUP.md §10)
 # channel: telegram (채팅 안 복용 완료 버튼) | kakao (GAS 링크, §9)
 medication_alert:

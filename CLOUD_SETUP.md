@@ -69,6 +69,15 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 
 - **매일 12:00 KST** 자동 실행 → **§8 cron-job.org** 권장
 
+### TaxWatch 세금 뉴스 브리핑
+
+GitHub → **Actions** → **TaxWatch News Briefing** → **Run workflow**
+
+1~2분 후 Gmail `[세금 뉴스]` 메일 + 텔레그램 「브리핑 메일 보기」 알림.
+
+- 필요 Secret: Gmail 3개 + `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
+- 자동 실행: **§8-4** cron-job.org **매일 23:00 KST** (GitHub 내장 schedule 없음)
+
 ### 매일 9시 미국 주식 시세 (나스닥·테슬라·엔비디아)
 
 GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
@@ -233,8 +242,39 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-daily
 | job alert stock 9am | `0 9 * * *` (매일 9시) | `stock-alert.yml` |
 | job alert briefing 12pm | `0 12 * * *` (매일 12시) | `daily-briefing.yml` |
 | job alert medication 10am | `0 10 * * *` (매일 10시) | `medication-alert.yml` |
+| job alert taxwatch 11pm | `0 23 * * *` (매일 23시) | `taxwatch-briefing.yml` |
 
 브리핑 **카톡만 끄려면** GitHub Secret `NOTIFY_VIA` → `email`.
+
+### 8-4. TaxWatch 세금 뉴스 브리핑 (매일 23시)
+
+[TaxWatch 최신뉴스](https://www.taxwatch.co.kr/search)에서 **오늘(KST) 올라온 기사 전부**를 Gmail HTML로 보내고, **텔레그램**으로 「브리핑 메일 보기」 알림을 보냅니다.
+
+> GitHub Actions **내장 schedule은 사용하지 않습니다.** 다른 알림(주가·브리핑)과 같이 **cron-job.org**만 씁니다.
+
+**로컬 테스트**
+
+```bash
+cd ~/job-alert && source .venv/bin/activate
+python taxwatch_briefing.py
+```
+
+**cron-job.org** — 잡 하나 더 추가 (§6과 동일 PAT·POST·Headers·body)
+
+| 항목 | 값 |
+|------|-----|
+| **Title** | `job alert taxwatch 11pm` |
+| **URL** | `https://api.github.com/repos/gkrdlsdhk-cpa/job-alert/actions/workflows/taxwatch-briefing.yml/dispatches` |
+| **Schedule** | Custom crontab: `0 23 * * *` |
+| **Time zone** | `Asia/Seoul` |
+| **Request method** | **POST** |
+| **Headers** | §6과 동일 (`Accept`, `Authorization`, `X-GitHub-Api-Version`, `Content-Type`) |
+| **Request body** | `{"ref":"main"}` |
+
+**SAVE** → **TEST RUN** → `204` → 1~2분 후 텔레그램 알림 확인.
+
+필요 Secret: `EMAIL_FROM`, `EMAIL_PASSWORD`, `EMAIL_TO`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`  
+(복약·주가와 **동일 텔레그램 봇** 사용 가능)
 
 ---
 

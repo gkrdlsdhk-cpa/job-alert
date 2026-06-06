@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime
+from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
 import requests
+
+KST = ZoneInfo("Asia/Seoul")
 
 CALLBACK_MED_TAKEN = "med_taken"
 
@@ -48,6 +53,30 @@ def send_medication_reminder(text: str) -> int:
             "inline_keyboard": [
                 [{"text": "먹었어요 ✅", "callback_data": CALLBACK_MED_TAKEN}]
             ]
+        },
+    )
+
+
+def gmail_search_url(email_to: str, query: str) -> str:
+    """Gmail 검색 화면으로 연결."""
+    authuser = quote(email_to, safe="")
+    encoded_query = quote(query, safe="")
+    return f"https://mail.google.com/mail/?authuser={authuser}#search/{encoded_query}"
+
+
+def send_taxwatch_briefing_alert(email_to: str, article_count: int) -> int:
+    """세금 뉴스 브리핑 — Gmail 전체 메일 링크 버튼."""
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    today_short = datetime.now(KST).strftime("%m-%d")
+    mail_url = gmail_search_url(email_to, f"[세금 뉴스] {today}")
+    if article_count:
+        text = f"📰 세금 뉴스 ({today_short})\n{article_count}건 → {email_to}"
+    else:
+        text = f"📰 세금 뉴스 ({today_short})\n오늘 기사 없음 → {email_to}"
+    return _send_message(
+        text=text,
+        reply_markup={
+            "inline_keyboard": [[{"text": "브리핑 메일 보기", "url": mail_url}]]
         },
     )
 

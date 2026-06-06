@@ -1,0 +1,55 @@
+name: TaxWatch News Briefing
+
+on:
+  # 매일 23:00 KST: cron-job.org가 workflow_dispatch 호출 (GitHub schedule 없음, CLOUD_SETUP.md §8-4)
+  workflow_dispatch:
+
+jobs:
+  taxwatch-briefing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check GitHub Secrets
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          missing=""
+          for name in EMAIL_FROM EMAIL_PASSWORD EMAIL_TO TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID; do
+            eval "val=\$$name"
+            if [ -z "$val" ]; then
+              missing="$missing $name"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "GitHub → Settings → Secrets and variables → Actions 에서 등록해 주세요:"
+            echo "$missing"
+            echo "자세한 목록: CLOUD_SETUP.md"
+            exit 1
+          fi
+
+      - name: Run TaxWatch briefing
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: "587"
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python taxwatch_briefing.py
