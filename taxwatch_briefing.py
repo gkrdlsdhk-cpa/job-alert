@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""세금 뉴스 — TaxWatch + 이택스뉴스 당일 기사 Gmail 브리핑 + 텔레그램 알림."""
+"""세금 뉴스 — TaxWatch + 이택스뉴스 + 한국경제 당일 기사 Gmail 브리핑 + 텔레그램 알림."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import yaml
 from dotenv import load_dotenv
 
 from src.etaxnews_news import DEFAULT_FEEDS, fetch_today_by_section
+from src.hankyung_tax_news import fetch_today_articles as fetch_hankyung_today
 from src.taxwatch_email_sender import send_digest as send_email_digest
 from src.taxwatch_news import fetch_today_articles
 
@@ -28,6 +29,10 @@ def _build_sections(config: dict) -> dict[str, list[dict]]:
 
     if briefing_cfg.get("taxwatch", True):
         sections["TaxWatch"] = fetch_today_articles(max_pages=max_pages)
+
+    hankyung_cfg = briefing_cfg.get("hankyung") or {}
+    if hankyung_cfg.get("enabled", True):
+        sections["한국경제 · 세금"] = fetch_hankyung_today(max_pages=max_pages)
 
     etax_cfg = briefing_cfg.get("etaxnews") or {}
     if etax_cfg.get("enabled", True):
