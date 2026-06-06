@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TaxWatch News Briefing 워크플로를 API로 트리거 (cron-job.org 23시 잡 테스트용)
+# 오늘의 tax 브리핑 워크플로를 API로 트리거 (cron-job.org 23시 잡 테스트용)
 # 사용: GITHUB_TOKEN=github_pat_xxx ./scripts/trigger-taxwatch-briefing.sh
 
 set -euo pipefail
@@ -27,7 +27,7 @@ http_code="$(
 )"
 
 if [[ "$http_code" == "204" ]]; then
-  echo "OK — TaxWatch News Briefing 트리거됨 (ref=${REF})"
+  echo "OK — 오늘의 tax 브리핑 트리거됨 (ref=${REF})"
   echo "GitHub → Actions 에서 실행 여부를 확인하세요."
   exit 0
 fi

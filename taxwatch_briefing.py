@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""세금 뉴스 — TaxWatch + 이택스뉴스 + 한국경제 + 택스타임스 + 일간NTN 당일 기사 Gmail 브리핑 + 텔레그램 알림."""
+"""오늘의 tax 브리핑 — TaxWatch + 이택스뉴스 + 한국경제 + 택스타임스 + 일간NTN 당일 기사 Gmail + 텔레그램 알림."""
 
 from __future__ import annotations
 
@@ -73,7 +73,7 @@ def deliver_taxwatch_briefing() -> None:
     briefing_cfg = config.get("taxwatch_briefing", {})
     channel = (briefing_cfg.get("channel") or "telegram").strip().lower()
 
-    print("1/2 세금 뉴스 수집 중...")
+    print("1/2 오늘의 tax 브리핑 수집 중...")
     sections = _build_sections(config)
     total = 0
     for section_name, articles in sections.items():

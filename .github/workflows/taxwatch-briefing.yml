@@ -1,4 +1,4 @@
-name: TaxWatch News Briefing
+name: 오늘의 tax 브리핑
 
 on:
   # 매일 23:00 KST: cron-job.org가 workflow_dispatch 호출 (GitHub schedule 없음, CLOUD_SETUP.md §8-4)
@@ -43,7 +43,7 @@ jobs:
             exit 1
           fi
 
-      - name: Run TaxWatch briefing
+      - name: Run 오늘의 tax 브리핑
         env:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}

@@ -65,14 +65,14 @@ def gmail_search_url(email_to: str, query: str) -> str:
 
 
 def send_taxwatch_briefing_alert(email_to: str, article_count: int) -> int:
-    """세금 뉴스 브리핑 — Gmail 전체 메일 링크 버튼."""
+    """오늘의 tax 브리핑 — Gmail 전체 메일 링크 버튼."""
     today = datetime.now(KST).strftime("%Y-%m-%d")
     today_short = datetime.now(KST).strftime("%m-%d")
-    mail_url = gmail_search_url(email_to, f"[세금 뉴스] {today}")
+    mail_url = gmail_search_url(email_to, f"[오늘의 tax 브리핑] {today}")
     if article_count:
-        text = f"📰 세금 뉴스 ({today_short})\n{article_count}건 → {email_to}"
+        text = f"📰 오늘의 tax 브리핑 ({today_short})\n{article_count}건 → {email_to}"
     else:
-        text = f"📰 세금 뉴스 ({today_short})\n오늘 기사 없음 → {email_to}"
+        text = f"📰 오늘의 tax 브리핑 ({today_short})\n오늘 기사 없음 → {email_to}"
     return _send_message(
         text=text,
         reply_markup={

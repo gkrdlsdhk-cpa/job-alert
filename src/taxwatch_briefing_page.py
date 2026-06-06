@@ -1,4 +1,4 @@
-"""세금 뉴스 브리핑 HTML (TaxWatch + 이택스뉴스 + 한국경제 + 택스타임스 + 일간NTN)."""
+"""오늘의 tax 브리핑 HTML (TaxWatch + 이택스뉴스 + 한국경제 + 택스타임스 + 일간NTN)."""
 
 from __future__ import annotations
 
@@ -43,14 +43,14 @@ def render_html(sections: dict[str, list[dict]]) -> str:
         body = "\n".join(_render_section(title, articles) for title, articles in sections.items())
     else:
         count_line = ""
-        body = '<p class="empty">오늘 올라온 세금 뉴스 기사가 없습니다.</p>'
+        body = '<p class="empty">오늘 올라온 기사가 없습니다.</p>'
 
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>세금 뉴스 {title_date}</title>
+  <title>오늘의 tax 브리핑 {title_date}</title>
   <style>
     * {{ box-sizing: border-box; }}
     body {{
@@ -90,7 +90,7 @@ def render_html(sections: dict[str, list[dict]]) -> str:
 </head>
 <body>
   <div class="wrap">
-    <h1>📰 세금 뉴스 브리핑</h1>
+    <h1>📰 오늘의 tax 브리핑</h1>
     <p class="sub">{title_date} · 업데이트 {updated}</p>
     {count_line}
     {body}
