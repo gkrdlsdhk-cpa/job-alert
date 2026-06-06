@@ -367,8 +367,7 @@ python scripts/telegram_set_webhook.py
 python scripts/telegram_set_webhook.py --info   # url 이 Worker 주소인지 확인
 ```
 
-> Webhook 등록 후에는 `getUpdates`(로컬 watch)가 **동작하지 않습니다.**  
-> 로컬에서 watch 테스트할 때만: `python scripts/telegram_set_webhook.py --delete`
+> Webhook 등록 후 버튼 처리는 **Worker만** 담당합니다.
 
 #### 10-4-3. cron-job.org — 알림 1개만
 

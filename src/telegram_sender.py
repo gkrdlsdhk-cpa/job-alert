@@ -1,4 +1,4 @@
-"""텔레그램 봇 API — 복약 알림·인라인 버튼."""
+"""텔레그램 봇 API — 복약 알림 발송."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ def _chat_id() -> str:
 
 
 def send_medication_reminder(text: str) -> int:
-    """복약 알림 + 「먹었어요 ✅」 버튼. 누르면 메시지가 복용 완료로 바뀜."""
+    """복약 알림 + 「먹었어요 ✅」 버튼. 누르면 Worker Webhook이 복용 완료로 변경."""
     response = requests.post(
         _api_url("sendMessage"),
         json={
@@ -48,49 +48,3 @@ def send_medication_reminder(text: str) -> int:
     message_id = payload["result"]["message_id"]
     print(f"텔레그램 발송 완료 (message_id={message_id})")
     return message_id
-
-
-def get_updates(*, offset: int | None = None, timeout: int = 0) -> list[dict]:
-    params: dict = {"timeout": timeout}
-    if timeout > 0:
-        params["allowed_updates"] = ["callback_query"]
-    if offset is not None:
-        params["offset"] = offset
-    response = requests.get(
-        _api_url("getUpdates"),
-        params=params,
-        timeout=max(15, timeout + 5),
-    )
-    response.raise_for_status()
-    payload = response.json()
-    if not payload.get("ok"):
-        raise RuntimeError(f"getUpdates 실패: {payload}")
-    return payload.get("result", [])
-
-
-def answer_callback(callback_query_id: str, text: str = "복용 완료!") -> bool:
-    """버튼 탭 확인. 만료된 클릭(400)은 False, 성공 시 True."""
-    response = requests.post(
-        _api_url("answerCallbackQuery"),
-        json={"callback_query_id": callback_query_id, "text": text},
-        timeout=15,
-    )
-    if response.status_code == 400:
-        return False
-    response.raise_for_status()
-    return True
-
-
-def mark_message_taken(chat_id: str | int, message_id: int, *, original_text: str) -> None:
-    """버튼 누른 뒤 메시지에 체크 표시."""
-    response = requests.post(
-        _api_url("editMessageText"),
-        json={
-            "chat_id": chat_id,
-            "message_id": message_id,
-            "text": f"✅ {original_text}\n\n복용 완료",
-            "reply_markup": {"inline_keyboard": []},
-        },
-        timeout=15,
-    )
-    response.raise_for_status()

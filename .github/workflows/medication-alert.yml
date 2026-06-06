@@ -30,9 +30,7 @@ jobs:
       - name: Restore medication state
         uses: actions/cache/restore@v4
         with:
-          path: |
-            data/medication_daily_state.json
-            data/telegram_poll_state.json
+          path: data/medication_daily_state.json
           key: job-alert-medication-telegram-v1
 
       - name: Check Telegram Secrets
@@ -60,7 +58,5 @@ jobs:
         uses: actions/cache/save@v4
         if: always()
         with:
-          path: |
-            data/medication_daily_state.json
-            data/telegram_poll_state.json
+          path: data/medication_daily_state.json
           key: job-alert-medication-telegram-v1
