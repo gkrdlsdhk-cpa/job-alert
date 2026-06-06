@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import subprocess
 import sys
 import time
@@ -58,6 +59,8 @@ def _save_poll_offset(offset: int) -> None:
 
 def _flush_poll_queue() -> None:
     """이전 버튼 클릭 기록을 비워 새 알림과 섞이지 않게 함."""
+    if _webhook_enabled():
+        return
     offset = _load_poll_offset()
     updates = get_updates(offset=offset)
     if not updates:
@@ -66,16 +69,6 @@ def _flush_poll_queue() -> None:
     if offset is not None:
         max_update_id = max(max_update_id, offset)
     _save_poll_offset(max_update_id + 1)
-
-
-def _active_message_ids(state: dict) -> set[int]:
-    ids: set[int] = set()
-    for raw in state.get("telegram_message_ids") or []:
-        ids.add(int(raw))
-    legacy = state.get("telegram_message_id")
-    if legacy is not None:
-        ids.add(int(legacy))
-    return ids
 
 
 def deliver_morning(message: str) -> None:
@@ -147,22 +140,31 @@ def _process_updates(updates: list[dict], offset: int | None) -> int:
             continue
 
         state = load_state()
-        active_ids = _active_message_ids(state)
-        if active_ids and message_id not in active_ids:
-            continue
+        already_taken_today = bool(state.get("taken"))
 
-        if state.get("taken"):
-            answer_callback(callback["id"], "오늘 이미 체크했어요.")
-            continue
+        if not already_taken_today:
+            mark_taken()
 
-        mark_taken()
-        answer_callback(callback["id"], "복용 완료!")
+        answer_callback(
+            callback["id"],
+            "오늘 이미 체크했어요." if already_taken_today else "복용 완료!",
+        )
 
         if chat_id and message_id and text:
             try:
                 mark_message_taken(chat_id, message_id, original_text=text)
             except requests.HTTPError:
                 pass
+
+        if message_id is not None:
+            from src.medication_state import save_state
+
+            ids = list(state.get("telegram_message_ids") or [])
+            if int(message_id) not in ids:
+                ids.append(int(message_id))
+            state["telegram_message_ids"] = ids
+            state["telegram_message_id"] = int(message_id)
+            save_state(state)
 
         handled += 1
         print("복약(텔레그램): 복용 완료 버튼 처리됨.")
@@ -175,6 +177,9 @@ def _process_updates(updates: list[dict], offset: int | None) -> int:
 
 def poll_button_clicks() -> int:
     """인라인 버튼(복용 완료) 눌림 처리. 처리한 건수 반환."""
+    if _webhook_enabled():
+        print("복약(텔레그램): Webhook 모드 — poll 불필요.")
+        return 0
     offset = _load_poll_offset()
     updates = get_updates(offset=offset)
     if not updates:
@@ -194,14 +199,31 @@ def _watch_lock_pid() -> int | None:
         return None
 
 
+def _stop_watch() -> None:
+    pid = _watch_lock_pid()
+    if pid is None:
+        return
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError:
+        pass
+    WATCH_LOCK.unlink(missing_ok=True)
+
+
+def _webhook_enabled() -> bool:
+    return os.getenv("TELEGRAM_USE_WEBHOOK", "").strip() == "1"
+
+
 def _spawn_watch_if_local() -> None:
     """맥 로컬: 알림 후 백그라운드에서 버튼 클릭을 자동 감시."""
+    if _webhook_enabled():
+        print("복약(텔레그램): Webhook 모드 — 버튼은 Worker가 즉시 처리합니다.")
+        return
     if os.getenv("GITHUB_ACTIONS") or os.getenv("CI"):
         return
     if os.getenv("TELEGRAM_WATCH", "1").strip() == "0":
         return
-    if _watch_lock_pid() is not None:
-        return
+    _stop_watch()
 
     script = ROOT_DIR / "telegram_watch.py"
     subprocess.Popen(
@@ -214,22 +236,31 @@ def _spawn_watch_if_local() -> None:
     print("복약(텔레그램): 버튼 감시 시작 — 누르면 곧바로 반영됩니다.")
 
 
-def watch_button_clicks(*, max_minutes: int = 180) -> None:
+def watch_button_clicks(
+    *,
+    max_minutes: int = 180,
+    exit_when_taken: bool = False,
+) -> None:
     """Long polling으로 버튼 클릭을 실시간 감시."""
+    if _webhook_enabled():
+        print("복약(텔레그램): Webhook 모드 — watch 불필요.")
+        return
+    if os.getenv("GITHUB_ACTIONS") or os.getenv("CI"):
+        exit_when_taken = True
+
     WATCH_LOCK.parent.mkdir(parents=True, exist_ok=True)
     WATCH_LOCK.write_text(str(os.getpid()), encoding="utf-8")
     deadline = time.monotonic() + max_minutes * 60
 
     try:
         while time.monotonic() < deadline:
-            if load_state().get("taken"):
+            if exit_when_taken and load_state().get("taken"):
                 print("복약(텔레그램): 복용 체크 완료 — 감시 종료.")
                 return
 
             offset = _load_poll_offset()
             updates = get_updates(offset=offset, timeout=25)
             if updates:
-                if _process_updates(updates, offset):
-                    return
+                _process_updates(updates, offset)
     finally:
         WATCH_LOCK.unlink(missing_ok=True)

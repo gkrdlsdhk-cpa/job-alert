@@ -335,22 +335,57 @@ medication_alert:
 
 push 후 GitHub Secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
 
-### 10-4. cron-job.org (3개 — 복약용)
+### 10-4. Webhook — 버튼 즉시 반영 (권장)
+
+GitHub Actions 감시 대신 **Cloudflare Workers Webhook**을 쓰면 맥이 꺼져 있어도 버튼 탭 **1~2초 안**에 **복용 완료**로 바뀝니다.
+
+#### 10-4-1. Cloudflare Worker 배포
+
+1. [Cloudflare](https://dash.cloudflare.com) 가입 → **Workers & Pages** → **Create**
+2. **Hello World** 템플릿으로 Worker 생성
+3. 코드 편집기에 `workers/telegram-webhook/worker.js` 내용 **전부 붙여넣기** → **Deploy**
+4. Worker URL 복사 (예: `https://job-alert-telegram-webhook.kim.workers.dev`)
+5. **Settings** → **Variables** → **Secrets**:
+   - `TELEGRAM_BOT_TOKEN` = BotFather 토큰
+   - `WEBHOOK_SECRET` = 임의 문자열 (예: `my-random-secret-123`) — 선택이지만 권장
+
+> Wrangler CLI 사용 시: `workers/telegram-webhook/wrangler.toml.example` 참고
+
+#### 10-4-2. Webhook 등록 (Mac 터미널, 1회)
+
+`.env`에 추가:
+
+```
+TELEGRAM_USE_WEBHOOK=1
+TELEGRAM_WEBHOOK_URL=https://job-alert-telegram-webhook.kim.workers.dev
+TELEGRAM_WEBHOOK_SECRET=my-random-secret-123
+```
+
+```bash
+cd ~/job-alert
+source .venv/bin/activate
+python scripts/telegram_set_webhook.py
+python scripts/telegram_set_webhook.py --info   # url 이 Worker 주소인지 확인
+```
+
+> Webhook 등록 후에는 `getUpdates`(로컬 watch)가 **동작하지 않습니다.**  
+> 로컬에서 watch 테스트할 때만: `python scripts/telegram_set_webhook.py --delete`
+
+#### 10-4-3. cron-job.org — 9시 알림 1개만
 
 | Title | Schedule (KST) | URL 워크플로 |
 |-------|----------------|--------------|
 | job alert medication 9am | `0 9 * * *` | `medication-alert.yml` |
-| job alert medication 11am | `0 11 * * *` | `medication-followup.yml` |
-| job alert telegram poll | `*/5 9-12 * * *` | `telegram-poll.yml` |
 
-- **poll**: 9~12시 **5분마다** 버튼 클릭 수신 (채팅 안 체크 반영)
+- **역할**: 매일 9시 텔레그램 알림만 발송
+- **버튼 처리**: Worker Webhook이 **24시간 즉시** 처리 (poll·재알림 cron 불필요)
 - ADVANCED: §6과 동일 (POST, PAT, `{"ref":"main"}`)
 
 ### 10-5. 테스트
 
 1. Actions → **Medication Alert** → Run workflow → 텔레그램에 메시지+버튼
-2. **복용 완료 ✅** 탭
-3. **Telegram Medication Poll** Run workflow (또는 poll cron 대기) → 메시지가 **✅ (복용 완료)** 로 바뀜
+2. **먹었어요 ✅** 탭
+3. **1~2초 안** 메시지가 **✅ … 복용 완료** 로 바뀌면 성공
 
 ---
 

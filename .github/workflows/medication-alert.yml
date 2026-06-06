@@ -53,6 +53,7 @@ jobs:
           MEDICATION_DAILY_STATE_FILE: data/medication_daily_state.json
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_USE_WEBHOOK: "1"
         run: python medication_alert.py
 
       - name: Save medication state

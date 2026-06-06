@@ -1,0 +1,13 @@
+# wrangler.toml.example
+# 1. cp wrangler.toml.example wrangler.toml
+# 2. name / account_id 수정
+# 3. wrangler secret put TELEGRAM_BOT_TOKEN
+# 4. wrangler secret put WEBHOOK_SECRET  (선택, scripts/telegram_set_webhook.py 와 동일 값)
+# 5. npx wrangler deploy
+
+name = "job-alert-telegram-webhook"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Cloudflare 대시보드 → Workers → 계정 ID
+# account_id = "your_account_id"
