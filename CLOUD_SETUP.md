@@ -73,7 +73,7 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 
 GitHub → **Actions** → **TaxWatch News Briefing** → **Run workflow**
 
-1~2분 후 Gmail `[세금 뉴스]` 메일 (TaxWatch + 이택스뉴스 + 한국경제 세금 + 택스타임스) + 텔레그램 「브리핑 메일 보기」 알림.
+1~2분 후 Gmail `[세금 뉴스]` 메일 (TaxWatch + 이택스뉴스 + 한국경제 세금 + 택스타임스 + 일간NTN) + 텔레그램 「브리핑 메일 보기」 알림.
 
 - 필요 Secret: Gmail 3개 + `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
 - 자동 실행: **§8-4** cron-job.org **매일 23:00 KST** (GitHub 내장 schedule 없음)
@@ -248,7 +248,7 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-daily
 
 ### 8-4. TaxWatch 세금 뉴스 브리핑 (매일 23시)
 
-[TaxWatch 최신뉴스](https://www.taxwatch.co.kr/search), [이택스뉴스](https://www.etaxnews.com/) **세정(내국세·지방세)·유권해석**, [한국경제 세금](https://www.hankyung.com/economy/tax), [택스타임스 내국세·지방세](https://www.taxtimes.co.kr/news/section_list_all.html?sec_no=416)에서 **오늘(KST) 올라온 기사**를 Gmail HTML로 보내고, **텔레그램**으로 「브리핑 메일 보기」 알림을 보냅니다.
+[TaxWatch 최신뉴스](https://www.taxwatch.co.kr/search), [이택스뉴스](https://www.etaxnews.com/) **세정(내국세·지방세)·유권해석**, [한국경제 세금](https://www.hankyung.com/economy/tax), [택스타임스 내국세·지방세](https://www.taxtimes.co.kr/news/section_list_all.html?sec_no=416), [일간NTN 유권해석·조세행정·오피니언](https://www.intn.co.kr/news/articleList.html?sc_section_code=S1N5&view_type=sm)에서 **오늘(KST) 올라온 기사**를 Gmail HTML로 보내고, **텔레그램**으로 「브리핑 메일 보기」 알림을 보냅니다.
 
 > GitHub Actions **내장 schedule은 사용하지 않습니다.** 다른 알림(주가·브리핑)과 같이 **cron-job.org**만 씁니다.
 
