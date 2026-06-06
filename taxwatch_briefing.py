@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""세금 뉴스 — TaxWatch + 이택스뉴스 + 한국경제 당일 기사 Gmail 브리핑 + 텔레그램 알림."""
+"""세금 뉴스 — TaxWatch + 이택스뉴스 + 한국경제 + 택스타임스 당일 기사 Gmail 브리핑 + 텔레그램 알림."""
 
 from __future__ import annotations
 
@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 
 from src.etaxnews_news import DEFAULT_FEEDS, fetch_today_by_section
 from src.hankyung_tax_news import fetch_today_articles as fetch_hankyung_today
+from src.taxtimes_news import DEFAULT_FEEDS as TAXTIMES_DEFAULT_FEEDS
+from src.taxtimes_news import fetch_today_by_section as fetch_taxtimes_today
 from src.taxwatch_email_sender import send_digest as send_email_digest
 from src.taxwatch_news import fetch_today_articles
 
@@ -42,6 +44,15 @@ def _build_sections(config: dict) -> dict[str, list[dict]]:
             max_pages=max_pages,
         ).items():
             sections[f"이택스뉴스 · {section_name}"] = articles
+
+    taxtimes_cfg = briefing_cfg.get("taxtimes") or {}
+    if taxtimes_cfg.get("enabled", True):
+        feeds = taxtimes_cfg.get("feeds") or TAXTIMES_DEFAULT_FEEDS
+        for section_name, articles in fetch_taxtimes_today(
+            feeds,
+            max_pages=max_pages,
+        ).items():
+            sections[f"택스타임스 · {section_name}"] = articles
 
     return sections
 

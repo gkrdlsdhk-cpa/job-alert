@@ -1,4 +1,4 @@
-"""세금 뉴스 브리핑 HTML (TaxWatch + 이택스뉴스 + 한국경제)."""
+"""세금 뉴스 브리핑 HTML (TaxWatch + 이택스뉴스 + 한국경제 + 택스타임스)."""
 
 from __future__ import annotations
 
@@ -94,7 +94,7 @@ def render_html(sections: dict[str, list[dict]]) -> str:
     <p class="sub">{title_date} · 업데이트 {updated}</p>
     {count_line}
     {body}
-    <p class="footer">job-alert · TaxWatch · 이택스뉴스 · 한국경제</p>
+    <p class="footer">job-alert · TaxWatch · 이택스뉴스 · 한국경제 · 택스타임스</p>
   </div>
 </body>
 </html>
