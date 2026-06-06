@@ -14,8 +14,8 @@ from src.taxwatch_briefing_page import render_html
 KST = ZoneInfo("Asia/Seoul")
 
 
-def send_digest(articles: list[dict]) -> str:
-    """TaxWatch 브리핑 HTML 메일 발송. 받는 주소를 반환."""
+def send_digest(sections: dict[str, list[dict]]) -> str:
+    """세금 뉴스 브리핑 HTML 메일 발송. 받는 주소를 반환."""
     email_from = os.getenv("EMAIL_FROM", "").strip()
     email_password = os.getenv("EMAIL_PASSWORD", "").strip()
     email_to = os.getenv("EMAIL_TO", email_from).strip()
@@ -29,8 +29,8 @@ def send_digest(articles: list[dict]) -> str:
         )
 
     today = datetime.now(KST).strftime("%Y-%m-%d")
-    subject = f"[세금 뉴스] {today} TaxWatch 최신"
-    html_body = render_html(articles)
+    subject = f"[세금 뉴스] {today}"
+    html_body = render_html(sections)
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject

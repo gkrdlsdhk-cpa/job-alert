@@ -69,6 +69,8 @@ def parse_articles(html: str) -> list[dict]:
 
         articles.append(
             {
+                "source": "taxwatch",
+                "section": "TaxWatch",
                 "title": title_link.get_text(strip=True),
                 "link": urljoin(BASE_URL, title_link["href"]),
                 "published": published,

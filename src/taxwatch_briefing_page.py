@@ -1,4 +1,4 @@
-"""TaxWatch 세금 뉴스 브리핑 HTML."""
+"""세금 뉴스 브리핑 HTML (TaxWatch + 이택스뉴스)."""
 
 from __future__ import annotations
 
@@ -9,29 +9,41 @@ from zoneinfo import ZoneInfo
 KST = ZoneInfo("Asia/Seoul")
 
 
-def render_html(articles: list[dict]) -> str:
+def _render_section(title: str, articles: list[dict]) -> str:
+    if not articles:
+        return f"<section><h2>{escape(title)}</h2><p class=\"empty\">오늘 새 기사 없음</p></section>"
+
+    items_html = ["<ul>"]
+    for article in articles:
+        meta = escape(article.get("published", ""))
+        if article.get("author"):
+            meta += f" · {escape(article['author'])}"
+        items_html.append(
+            "<li>"
+            f'<a href="{escape(article["link"])}" target="_blank" rel="noopener">'
+            f'{escape(article["title"])}</a>'
+            f'<span class="meta">{meta}</span>'
+        )
+        summary = article.get("summary", "").strip()
+        if summary:
+            items_html.append(f'<p class="desc">{escape(summary)}</p>')
+        items_html.append("</li>")
+    items_html.append("</ul>")
+    return f"<section><h2>{escape(title)}</h2>\n" + "\n".join(items_html) + "\n</section>"
+
+
+def render_html(sections: dict[str, list[dict]]) -> str:
     today = datetime.now(KST)
     title_date = today.strftime("%Y년 %m월 %d일")
     updated = today.strftime("%Y-%m-%d %H:%M")
+    total = sum(len(articles) for articles in sections.values())
 
-    if articles:
-        items_html = ["<ul>"]
-        for article in articles:
-            items_html.append(
-                "<li>"
-                f'<a href="{escape(article["link"])}" target="_blank" rel="noopener">'
-                f'{escape(article["title"])}</a>'
-                f'<span class="meta">{escape(article.get("published", ""))}'
-                f'{(" · " + escape(article["author"])) if article.get("author") else ""}</span>'
-                f'<p class="desc">{escape(article.get("summary", ""))}</p>'
-                "</li>"
-            )
-        items_html.append("</ul>")
-        body = "\n".join(items_html)
-        count_line = f'<p class="count">오늘 기사 {len(articles)}건</p>'
+    if total:
+        count_line = f'<p class="count">오늘 기사 {total}건</p>'
+        body = "\n".join(_render_section(title, articles) for title, articles in sections.items())
     else:
-        body = '<p class="empty">오늘 올라온 TaxWatch 기사가 없습니다.</p>'
         count_line = ""
+        body = '<p class="empty">오늘 올라온 세금 뉴스 기사가 없습니다.</p>'
 
     return f"""<!DOCTYPE html>
 <html lang="ko">
@@ -60,7 +72,8 @@ def render_html(articles: list[dict]) -> str:
     h1 {{ font-size: 1.35rem; margin: 0 0 4px; }}
     .sub {{ color: #666; font-size: .9rem; margin-bottom: 12px; }}
     .count {{ color: #444; font-size: .92rem; margin: 0 0 16px; }}
-    h2 {{ font-size: 1.1rem; margin: 0 0 12px; border-bottom: 2px solid #2f6fed; padding-bottom: 6px; }}
+    h2 {{ font-size: 1.1rem; margin: 24px 0 12px; border-bottom: 2px solid #2f6fed; padding-bottom: 6px; }}
+    section:first-of-type h2 {{ margin-top: 0; }}
     ul {{ list-style: none; padding: 0; margin: 0; }}
     li {{
       padding: 12px 0;
@@ -77,14 +90,11 @@ def render_html(articles: list[dict]) -> str:
 </head>
 <body>
   <div class="wrap">
-    <h1>📰 TaxWatch 세금 뉴스</h1>
+    <h1>📰 세금 뉴스 브리핑</h1>
     <p class="sub">{title_date} · 업데이트 {updated}</p>
     {count_line}
-    <section>
-      <h2>최신뉴스</h2>
-      {body}
-    </section>
-    <p class="footer">job-alert · <a href="https://www.taxwatch.co.kr/search">taxwatch.co.kr</a></p>
+    {body}
+    <p class="footer">job-alert · TaxWatch · 이택스뉴스</p>
   </div>
 </body>
 </html>
