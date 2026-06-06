@@ -1,0 +1,65 @@
+name: Medication Alert
+
+on:
+  # 매일 09:00 KST: cron-job.org가 workflow_dispatch 호출 (CLOUD_SETUP.md §9)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  medication-alert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Prepare data directory
+        run: mkdir -p data
+
+      - name: Restore medication state
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            data/medication_daily_state.json
+            data/telegram_poll_state.json
+          key: job-alert-medication-telegram-v1
+
+      - name: Check Telegram Secrets
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          for name in TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID; do
+            eval "val=\$$name"
+            if [ -z "$val" ]; then
+              echo "GitHub Secret $name 을 등록해 주세요. (CLOUD_SETUP.md §10)"
+              exit 1
+            fi
+          done
+
+      - name: Send medication alert
+        env:
+          MEDICATION_DAILY_STATE_FILE: data/medication_daily_state.json
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python medication_alert.py
+
+      - name: Save medication state
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            data/medication_daily_state.json
+            data/telegram_poll_state.json
+          key: job-alert-medication-telegram-v1

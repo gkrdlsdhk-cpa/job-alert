@@ -224,15 +224,133 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-daily
 
 **SAVE** → **TEST RUN** → `204` → Actions에 **Daily Job Briefing** 1회 확인.
 
-### 8-3. cron-job 3개 요약
+### 8-3. cron-job 요약 (아래 §9 복약 포함)
 
 | Title | Schedule (KST) | 워크플로 |
 |-------|----------------|----------|
-| job alert realtime | `*/10 * * * 1-5` (평일 10분) | `kicpa-watch.yml` |
+| job alert realtime | `*/10 9-18 * * 1-5` (평일 9~19시 10분) | `kicpa-watch.yml` |
 | job alert stock 9am | `0 9 * * *` (매일 9시) | `stock-alert.yml` |
 | job alert briefing 12pm | `0 12 * * *` (매일 12시) | `daily-briefing.yml` |
+| job alert medication 9am | `0 9 * * *` (매일 9시) | `medication-alert.yml` |
+| job alert medication 11am | `0 11 * * *` (매일 11시) | `medication-followup.yml` |
 
 브리핑 **카톡만 끄려면** GitHub Secret `NOTIFY_VIA` → `email`.
+
+---
+
+## 9. 복약 알림 9시 + 복용 완료 버튼
+
+매일 **09:00** 카카오 알림 → **「복용 완료 ✅」** 버튼 → 체크 시 “오늘 복용함” 기록.  
+**11:00**까지 체크 없으면 **1회** 재알림.
+
+### 9-1. Google Apps Script (버튼 → 체크 기록)
+
+1. [script.google.com](https://script.google.com) → 새 프로젝트
+2. `scripts/medication-mark-gas.gs` 내용 붙여넣기
+3. **프로젝트 설정 → 스크립트 속성** 추가:
+
+| 속성 | 값 |
+|------|-----|
+| `MARK_SECRET` | 임의 비밀 문자열 (예: `my-med-secret-42`) |
+| `GITHUB_PAT` | job-alert용 `github_pat_...` (Actions Read and write) |
+| `GITHUB_REPO` | `gkrdlsdhk-cpa/job-alert` |
+
+4. **배포 → 새 배포 → 웹 앱** (실행: 나, 액세스: **모든 사용자**)
+5. 배포 URL 예: `https://script.google.com/macros/s/XXXX/exec`
+6. GitHub → **Secrets** → `MEDICATION_MARK_SECRET` = 위 `MARK_SECRET` 과 **동일**
+7. `config.yaml` → `medication_alert.mark_taken_url`:
+
+```yaml
+mark_taken_url: "https://script.google.com/macros/s/XXXX/exec?key=my-med-secret-42"
+```
+
+8. push 후 카카오 **제품 링크 관리** 웹 도메인: `https://script.google.com`
+
+### 9-2. cron-job.org — 복약 cronjob 2개
+
+**아침 알림 (9시)**
+
+| 항목 | 값 |
+|------|-----|
+| **Title** | `job alert medication 9am` |
+| **URL** | `.../medication-alert.yml/dispatches` |
+| **Schedule** | `0 9 * * *` / `Asia/Seoul` |
+| **ADVANCED** | §6과 동일 |
+
+**후속 알림 (11시, 체크 없을 때만)**
+
+| 항목 | 값 |
+|------|-----|
+| **Title** | `job alert medication 11am` |
+| **URL** | `.../medication-followup.yml/dispatches` |
+| **Schedule** | `0 11 * * *` / `Asia/Seoul` |
+| **ADVANCED** | §6과 동일 |
+
+### 9-3. 동작 확인
+
+1. **9시** 카카오 → **복용 완료 ✅** 버튼
+2. 버튼 탭 → 브라우저 **「✅ 복용 완료」** → Actions **Medication Mark Taken** 실행
+3. **11시** 전에 체크했으면 후속 알림 **안 옴** / 안 했으면 **재알림 1통**
+
+### 9-4. 메시지 변경 (선택)
+
+`config.yaml` → `medication_alert.message`, `follow_up_message`
+
+> **텔레그램 사용 시** → 아래 **§10** (채팅 안 버튼, GAS 불필요). `config.yaml` → `channel: telegram`
+
+---
+
+## 10. 복약 알림 — 텔레그램 (권장)
+
+카카오와 달리 **채팅 안 「복용 완료 ✅」 버튼** 한 번으로 체크됩니다.
+
+### 10-1. 봇 만들기
+
+1. 텔레그램에서 **@BotFather** 검색 → 채팅 시작
+2. `/newbot` 입력
+3. 봇 **이름** (표시용, 예: `내 복약 알림`)
+4. 봇 **username** (반드시 `bot`으로 끝남, 예: `my_med_alert_bot`)
+5. 나온 **토큰** 복사 (`123456789:ABC...`) → `.env` / GitHub Secret **`TELEGRAM_BOT_TOKEN`**
+
+### 10-2. chat_id 확인
+
+1. 방금 만든 **봇** 검색 → 채팅 시작 → **`/start`** 전송
+2. Mac 터미널:
+
+```bash
+cd ~/job-alert
+# .env 에 TELEGRAM_BOT_TOKEN= 넣은 뒤
+python scripts/telegram_get_chat_id.py
+```
+
+3. 출력된 숫자 → `.env` / GitHub Secret **`TELEGRAM_CHAT_ID`**
+
+### 10-3. config.yaml
+
+```yaml
+medication_alert:
+  channel: telegram
+  message: "아침 약 드실 시간이에요."
+```
+
+push 후 GitHub Secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
+
+### 10-4. cron-job.org (3개 — 복약용)
+
+| Title | Schedule (KST) | URL 워크플로 |
+|-------|----------------|--------------|
+| job alert medication 9am | `0 9 * * *` | `medication-alert.yml` |
+| job alert medication 11am | `0 11 * * *` | `medication-followup.yml` |
+| job alert telegram poll | `*/5 9-12 * * *` | `telegram-poll.yml` |
+
+- **poll**: 9~12시 **5분마다** 버튼 클릭 수신 (채팅 안 체크 반영)
+- ADVANCED: §6과 동일 (POST, PAT, `{"ref":"main"}`)
+
+### 10-5. 테스트
+
+1. Actions → **Medication Alert** → Run workflow → 텔레그램에 메시지+버튼
+2. **복용 완료 ✅** 탭
+3. **Telegram Medication Poll** Run workflow (또는 poll cron 대기) → 메시지가 **✅ (복용 완료)** 로 바뀜
 
 ---
 
