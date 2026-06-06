@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""매일 카카오톡으로 미국 주식 시세 알림 (기본: 테슬라, 엔비디아)."""
+"""매일 미국 주식 시세 알림 (텔레그램 또는 카카오)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,6 @@ from pathlib import Path
 import yaml
 from dotenv import load_dotenv
 
-from src.kakao_sender import send_stock_quotes_alert
 from src.stock_daily_guard import already_sent_today, mark_sent_today
 from src.stock_quotes import fetch_quotes, format_kakao_body
 
@@ -21,13 +20,14 @@ def load_config() -> dict:
 
 
 def deliver_stock_alert() -> None:
-    """시세 조회 후 카카오 발송 (하루 1회)."""
+    """시세 조회 후 알림 발송 (하루 1회)."""
     if already_sent_today():
         print("주가보고: 오늘 이미 발송함 — 건너뜀.")
         return
 
     config = load_config()
     stock_cfg = config.get("stock_alert", {})
+    channel = (stock_cfg.get("channel") or "telegram").strip().lower()
     symbols = stock_cfg.get("symbols")
     if not symbols:
         raise ValueError("config.yaml의 stock_alert.symbols를 설정해 주세요.")
@@ -39,8 +39,21 @@ def deliver_stock_alert() -> None:
         print(f"  {q.name}({q.symbol}) ${q.price:,.2f} {sign}{q.change_pct:.2f}%")
 
     body = format_kakao_body(quotes)
-    print("카카오톡 발송 중...")
-    send_stock_quotes_alert(body, link=quotes[0].link if quotes else None)
+    link = quotes[0].link if quotes else None
+
+    if channel == "telegram":
+        from src.telegram_sender import send_stock_quotes_alert
+
+        print("텔레그램 발송 중...")
+        send_stock_quotes_alert(body, link=link)
+    elif channel == "kakao":
+        from src.kakao_sender import send_stock_quotes_alert
+
+        print("카카오톡 발송 중...")
+        send_stock_quotes_alert(body, link=link)
+    else:
+        raise ValueError("stock_alert.channel은 telegram 또는 kakao 여야 합니다.")
+
     mark_sent_today()
     print("완료!")
 

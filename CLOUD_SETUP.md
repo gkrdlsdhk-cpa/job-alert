@@ -73,10 +73,11 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 
 GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
 
-1~2분 후 카카오톡 **나와의 채팅**에 `<주가보고>` 메시지 (가격 + 전일 대비 %).
+1~2분 후 텔레그램에 `📈 <주가보고>` 메시지 (가격 + 전일 대비 %, 네이버 증권 버튼).
 
-- 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
-- 카카오 **제품 링크 관리** 웹 도메인: `https://m.stock.naver.com`
+- 필요 Secret: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` (복약 알림과 동일 봇 가능, **§10**)
+- `config.yaml` → `stock_alert.channel: telegram` (기본값)
+- 카카오로 받으려면 `channel: kakao` + `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
 - **매일 09:00 KST** 자동 실행 → **§7 cron-job.org** 권장 (GitHub 내장 9시 cron은 자주 스킵됨)
 
 ### 실시간 카카오 알림 (회계사회 + 삼일PwC 정기채용)
@@ -186,7 +187,7 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-stock
 
 ### 7-3. 하루 1회·백업
 
-- `stock_alert.py`가 `stock_daily_sent.json`으로 **당일 중복 카톡** 방지 (TEST RUN·수동 실행도 스킵)
+- `stock_alert.py`가 `stock_daily_sent.json`으로 **당일 중복 발송** 방지 (TEST RUN·수동 실행도 스킵)
 - 평일 9시대 **Realtime Job Alerts**가 돌면 `stock_daily_guard`가 **아직 안 보냈을 때만** 1회 백업 시도
 
 ### 7-4. 주말
@@ -299,9 +300,10 @@ mark_taken_url: "https://script.google.com/macros/s/XXXX/exec?key=my-med-secret-
 
 ---
 
-## 10. 복약 알림 — 텔레그램 (권장)
+## 10. 텔레그램 — 복약·주가 알림 (권장)
 
-카카오와 달리 **채팅 안 「복용 완료 ✅」 버튼** 한 번으로 체크됩니다.
+복약 알림은 카카오와 달리 **채팅 안 「복용 완료 ✅」 버튼** 한 번으로 체크됩니다.  
+주가보고(`stock_alert.channel: telegram`)도 **같은 봇·chat_id**로 받을 수 있습니다.
 
 ### 10-1. 봇 만들기
 
@@ -330,6 +332,9 @@ python scripts/telegram_get_chat_id.py
 medication_alert:
   channel: telegram
   message: "아침 약 드실 시간이에요."
+
+stock_alert:
+  channel: telegram
 ```
 
 push 후 GitHub Secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
