@@ -14,7 +14,6 @@ import requests
 
 from src.medication_state import (
     load_state,
-    mark_followup_sent,
     mark_morning_sent,
     mark_taken,
 )
@@ -87,33 +86,6 @@ def deliver_morning(message: str) -> None:
     state["telegram_message_ids"] = [message_id]
     from src.medication_state import save_state
 
-    save_state(state)
-    _spawn_watch_if_local()
-
-
-def deliver_followup(message: str) -> None:
-    state = load_state()
-    if not state.get("morning_sent"):
-        print("복약 후속(텔레그램): 오늘 아침 알림 없음 — 건너뜀.")
-        return
-    if state.get("taken"):
-        print("복약 후속(텔레그램): 이미 복용 체크됨 — 건너뜀.")
-        return
-    if state.get("followup_sent"):
-        print("복약 후속(텔레그램): 오늘 후속 알림 이미 발송함 — 건너뜀.")
-        return
-
-    message_id = send_medication_reminder(message)
-    state = load_state()
-    ids = list(state.get("telegram_message_ids") or [])
-    legacy = state.get("telegram_message_id")
-    if legacy is not None and int(legacy) not in ids:
-        ids.append(int(legacy))
-    ids.append(message_id)
-    state["telegram_message_ids"] = ids
-    from src.medication_state import save_state
-
-    mark_followup_sent()
     save_state(state)
     _spawn_watch_if_local()
 
