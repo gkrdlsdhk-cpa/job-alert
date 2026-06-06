@@ -141,6 +141,34 @@ def send_stock_quotes_alert(body: str, *, link: str | None = None) -> None:
     )
 
 
+def send_medication_alert(message: str, *, mark_taken_url: str) -> None:
+    """복약 알림 — 복용 완료 버튼(웹 링크) 포함."""
+    access_token = get_access_token()
+    link = {"web_url": mark_taken_url, "mobile_web_url": mark_taken_url}
+    template = {
+        "object_type": "feed",
+        "content": {
+            "title": "💊 복약 알림",
+            "description": message,
+            "link": link,
+        },
+        "buttons": [
+            {
+                "title": "복용 완료 ✅",
+                "link": link,
+            }
+        ],
+    }
+    response = requests.post(
+        KAKAO_MEMO_URL,
+        headers={"Authorization": f"Bearer {access_token}"},
+        data={"template_object": json.dumps(template, ensure_ascii=False)},
+        timeout=15,
+    )
+    response.raise_for_status()
+    print("카카오톡 복약 알림 발송 완료")
+
+
 def send_notification(email_to: str) -> None:
     """Gmail 브리핑 링크가 포함된 카카오 알림 1통."""
     access_token = get_access_token()

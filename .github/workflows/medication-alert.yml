@@ -1,7 +1,7 @@
 name: Medication Alert
 
 on:
-  # 매일 09:00 KST: cron-job.org가 workflow_dispatch 호출 (CLOUD_SETUP.md §9)
+  # 매일 정해진 시각 KST: cron-job.org가 workflow_dispatch 호출 (CLOUD_SETUP.md §10)
   workflow_dispatch:
 
 permissions:
