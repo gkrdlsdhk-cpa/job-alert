@@ -52,30 +52,32 @@ WATCH_STEPS: list[WatchStep] = [
 
 
 def run_all(*, seed_only: bool = False, dry_run: bool = False) -> int:
-    failures: list[tuple[str, str]] = []
+    failures: list[tuple[int, str, str]] = []
+    total_steps = len(WATCH_STEPS)
 
-    for step in WATCH_STEPS:
-        print(f"\n=== {step.label} ===")
+    for step_no, step in enumerate(WATCH_STEPS, start=1):
+        print(f"\n=== [{step_no}/{total_steps}] {step.label} ===")
         try:
             kwargs: dict = {"seed_only": seed_only}
             if step.pass_dry_run:
                 kwargs["dry_run"] = dry_run
             code = step.run(**kwargs)
             if code != 0:
-                failures.append((step.label, f"종료 코드 {code}"))
+                failures.append((step_no, step.label, f"종료 코드 {code}"))
         except Exception as exc:
             print(f"오류 ({step.label}): {exc}", file=sys.stderr)
             traceback.print_exc()
-            failures.append((step.label, str(exc) or exc.__class__.__name__))
-        print(f"=== {step.label} 완료 ===")
+            failures.append((step_no, step.label, str(exc) or exc.__class__.__name__))
+        print(f"=== [{step_no}/{total_steps}] {step.label} 완료 ===")
 
     if not failures:
         return 0
 
-    print(f"실패 {len(failures)}건: {', '.join(name for name, _ in failures)}")
+    failed_labels = ", ".join(f"{no}.{label}" for no, label, _ in failures)
+    print(f"실패 {len(failures)}건: {failed_labels}")
     if not dry_run:
         try:
-            send_realtime_watch_failure_alert(failures)
+            send_realtime_watch_failure_alert(failures, total_steps=total_steps)
         except Exception as exc:
             print(f"실패 알림 발송 오류: {exc}", file=sys.stderr)
     return 1

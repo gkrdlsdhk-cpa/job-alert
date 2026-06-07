@@ -140,9 +140,43 @@ def _github_actions_run_url() -> str:
     return "https://github.com/gkrdlsdhk-cpa/job-alert/actions"
 
 
-def send_realtime_watch_failure_alert(failures: list[tuple[str, str]]) -> None:
+def _format_watch_failure_summary(
+    failures: list[tuple[int, str, str]],
+    *,
+    total_steps: int,
+) -> str:
+    """카카오 200자 제한 안에서 step별 실패 내역 포맷."""
+    header = f"실패 {len(failures)}/{total_steps} step"
+    lines = [header]
+    for step_no, label, error in failures:
+        err = error.replace("\n", " ").strip()
+        if len(err) > 48:
+            err = err[:47] + "…"
+        lines.append(f"{step_no}. {label} — {err}")
+
+    body = "\n".join(lines)
+    prefix = "[Job Alert 오류]\n"
+    max_body = KAKAO_TEXT_MAX - len(prefix) - 1
+    if len(body) <= max_body:
+        return body
+
+    # step 이름은 유지하고 오류 메시지만 줄여 재구성
+    compact: list[str] = [header]
+    for step_no, label, error in failures:
+        compact.append(f"{step_no}. {label}")
+    body = "\n".join(compact)
+    if len(body) <= max_body:
+        return body
+    return header + "\n" + ", ".join(label for _, label, _ in failures)
+
+
+def send_realtime_watch_failure_alert(
+    failures: list[tuple[int, str, str]],
+    *,
+    total_steps: int,
+) -> None:
     """Realtime Job Alerts watch step 실패 요약 — 카카오 알림."""
-    summary = "; ".join(f"{name}: {error}" for name, error in failures)
+    summary = _format_watch_failure_summary(failures, total_steps=total_steps)
     send_link_alert(
         "[Job Alert 오류]",
         summary,
