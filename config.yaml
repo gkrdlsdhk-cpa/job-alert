@@ -1,3 +1,8 @@
+# 매일 12시 취업 브리핑 (main.py) — Gmail 전체 + 알림
+# channel: telegram (권장, CLOUD_SETUP.md §10) | kakao (나에게 보내기) | email (Gmail만)
+job_briefing:
+  channel: telegram
+
 # 관심 기업 (Big4·회계법인 위주)
 companies:
   - name: 삼일회계법인

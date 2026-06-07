@@ -145,9 +145,12 @@ launchctl load ~/Library/LaunchAgents/com.jobalert.daily.plist
 
 ---
 
-## 9. 카카오톡으로 받기 (나에게 보내기)
+## 9. 카카오톡으로 받기 (나에게 보내기, 선택)
 
-이메일 대신 **카카오톡 '나와의 채팅'** 으로 받을 수 있습니다.
+> **기본값은 텔레그램**입니다 (`config.yaml` → `job_briefing.channel: telegram`, `CLOUD_SETUP.md` **§10**).  
+> 12시 취업 브리핑을 카카오로 받으려면 아래 설정 후 `job_briefing.channel: kakao`로 바꾸세요.
+
+**카카오톡 '나와의 채팅'** 으로 브리핑 알림을 받을 수 있습니다. (Gmail 전체 내용은 그대로 발송)
 
 ### 9-1. 카카오 개발자 앱 만들기
 
@@ -161,9 +164,15 @@ launchctl load ~/Library/LaunchAgents/com.jobalert.daily.plist
 ### 9-2. .env 설정
 
 ```
-NOTIFY_VIA=kakao
 KAKAO_REST_API_KEY=REST_API_키
 KAKAO_REDIRECT_URI=http://localhost:8080
+```
+
+`config.yaml`:
+
+```yaml
+job_briefing:
+  channel: kakao
 ```
 
 ### 9-3. 최초 1회 로그인 (refresh token 발급)
@@ -183,9 +192,7 @@ python kakao_auth.py
 python main.py
 ```
 
-카카오톡 **'나와의 채팅'** 에 브리핑 메시지가 옵니다.
-
-> 카카오 텍스트 메시지는 한 번에 200자 제한이라, 내용이 길면 [1/3], [2/3]처럼 여러 메시지로 나뉩니다.
+카카오톡 **'나와의 채팅'** 에 Gmail 확인 알림이 옵니다. (전체 내용은 Gmail)
 
 ---
 

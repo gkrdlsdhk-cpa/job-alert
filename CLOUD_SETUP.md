@@ -45,11 +45,12 @@ GitHub 저장소 → **Settings** → **Secrets and variables** → **Actions** 
 |-------------|------|------|
 | `NAVER_CLIENT_ID` | ✅ | 네이버 Client ID |
 | `NAVER_CLIENT_SECRET` | ✅ | 네이버 Client Secret |
-| `NOTIFY_VIA` | ✅ | `both` 추천 (Gmail 전체 + 카카오 알림) / `email` / `kakao` |
 | `EMAIL_FROM` | ✅ | Gmail 주소 |
 | `EMAIL_PASSWORD` | ✅ | Gmail 앱 비밀번호 |
 | `EMAIL_TO` | ✅ | 받을 Gmail (본인 주소) |
-| `KAKAO_REST_API_KEY` | 카카오 알림 시 | REST API 키 |
+| `TELEGRAM_BOT_TOKEN` | 텔레그램 알림 시 | BotFather 토큰 (**§10**) |
+| `TELEGRAM_CHAT_ID` | 텔레그램 알림 시 | 본인 chat id (**§10**) |
+| `KAKAO_REST_API_KEY` | 카카오 알림 시 | REST API 키 (실시간 공고·`job_briefing.channel: kakao`) |
 | `KAKAO_REFRESH_TOKEN` | 카카오 알림 시 | refresh token |
 | `KAKAO_CLIENT_SECRET` | 선택 | Client Secret **사용** 중일 때만 |
 
@@ -65,8 +66,10 @@ GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
 
 1~2분 후:
 - **Gmail** `[취업 브리핑]` 메일 (뉴스 + 사람인)
-- **카카오톡** 「Gmail 확인」 알림 (`NOTIFY_VIA=both` 또는 `kakao`일 때)
+- **텔레그램** 「브리핑 메일 보기」 알림 (`job_briefing.channel: telegram`, 기본값)
 
+- 필요 Secret: Gmail 3개 + `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` (**§10**, 다른 알림과 동일 봇 가능)
+- 카카오로 받으려면 `config.yaml` → `job_briefing.channel: kakao` + `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
 - **매일 12:00 KST** 자동 실행 → **§8 cron-job.org** 권장
 
 ### 오늘의 tax 브리핑
@@ -244,7 +247,7 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-daily
 | job alert medication 10am | `0 10 * * *` (매일 10시) | `medication-alert.yml` |
 | job alert taxwatch 11pm | `0 23 * * *` (매일 23시) | `taxwatch-briefing.yml` |
 
-브리핑 **카톡만 끄려면** GitHub Secret `NOTIFY_VIA` → `email`.
+브리핑 **텔레그램만 끄려면** `config.yaml` → `job_briefing.channel: email`.
 
 ### 8-4. 오늘의 tax 브리핑 (매일 23시)
 
@@ -340,10 +343,10 @@ mark_taken_url: "https://script.google.com/macros/s/XXXX/exec?key=my-med-secret-
 
 ---
 
-## 10. 텔레그램 — 복약·주가 알림 (권장)
+## 10. 텔레그램 — 복약·주가·취업·tax 브리핑 (권장)
 
 복약 알림은 카카오와 달리 **채팅 안 「복용 완료 ✅」 버튼** 한 번으로 체크됩니다.  
-주가보고(`stock_alert.channel: telegram`)도 **같은 봇·chat_id**로 받을 수 있습니다.
+주가·취업·tax 브리핑(`stock_alert`, `job_briefing`, `taxwatch_briefing` → `channel: telegram`)도 **같은 봇·chat_id**로 받을 수 있습니다.
 
 ### 10-1. 봇 만들기
 
@@ -373,7 +376,13 @@ medication_alert:
   channel: telegram
   message: "아침 약 드실 시간이에요."
 
+job_briefing:
+  channel: telegram
+
 stock_alert:
+  channel: telegram
+
+taxwatch_briefing:
   channel: telegram
 ```
 

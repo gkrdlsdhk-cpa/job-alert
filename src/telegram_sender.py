@@ -1,4 +1,4 @@
-"""텔레그램 봇 API — 복약·주가 알림 발송."""
+"""텔레그램 봇 API — 복약·주가·취업 브리핑 알림 발송."""
 
 from __future__ import annotations
 
@@ -62,6 +62,25 @@ def gmail_search_url(email_to: str, query: str) -> str:
     authuser = quote(email_to, safe="")
     encoded_query = quote(query, safe="")
     return f"https://mail.google.com/mail/?authuser={authuser}#search/{encoded_query}"
+
+
+def send_job_briefing_alert(
+    email_to: str, *, news_count: int, job_count: int
+) -> int:
+    """취업 브리핑 — Gmail 전체 메일 링크 버튼."""
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    today_short = datetime.now(KST).strftime("%m-%d")
+    mail_url = gmail_search_url(email_to, f"[취업 브리핑] {today}")
+    text = (
+        f"📋 취업 브리핑 ({today_short})\n"
+        f"뉴스 {news_count}건 · 채용 {job_count}건 → {email_to}"
+    )
+    return _send_message(
+        text=text,
+        reply_markup={
+            "inline_keyboard": [[{"text": "브리핑 메일 보기", "url": mail_url}]]
+        },
+    )
 
 
 def send_taxwatch_briefing_alert(email_to: str, article_count: int) -> int:

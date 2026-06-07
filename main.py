@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""매일 실행: 뉴스 + 채용 수집 → Gmail 전체 브리핑 (+ 선택: 카카오 알림)."""
+"""매일 실행: 뉴스 + 채용 수집 → Gmail 전체 브리핑 (+ 선택: 텔레그램/카카오 알림)."""
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
@@ -11,7 +10,6 @@ import yaml
 from dotenv import load_dotenv
 
 from src.email_sender import send_digest as send_email_digest
-from src.kakao_sender import send_notification as send_kakao_notification
 from src.naver_news import fetch_company_news
 from src.saramin_jobs import fetch_all_jobs
 
@@ -25,7 +23,8 @@ def load_config() -> dict:
 def main() -> int:
     load_dotenv()
     config = load_config()
-    notify_via = os.getenv("NOTIFY_VIA", "both").strip().lower()
+    briefing_cfg = config.get("job_briefing") or {}
+    channel = (briefing_cfg.get("channel") or "telegram").strip().lower()
 
     print("1/3 네이버 뉴스 수집 중...")
     company_news = fetch_company_news(
@@ -39,14 +38,27 @@ def main() -> int:
         max_results_per_keyword=config["saramin"]["max_results_per_keyword"],
     )
 
+    news_count = sum(len(articles) for articles in company_news.values())
+    job_count = sum(len(jobs) for jobs in saramin_jobs.values())
+
     print("3/3 알림 발송 중...")
     email_to = send_email_digest(company_news, saramin_jobs)
     print(f"Gmail 발송 완료 → {email_to}")
 
-    if notify_via in {"kakao", "both"}:
+    if channel == "telegram":
+        from src.telegram_sender import send_job_briefing_alert
+
+        send_job_briefing_alert(email_to, news_count=news_count, job_count=job_count)
+    elif channel == "kakao":
+        from src.kakao_sender import send_notification as send_kakao_notification
+
         send_kakao_notification(email_to)
-    elif notify_via != "email":
-        raise ValueError("NOTIFY_VIA는 email, kakao, both 중 하나여야 합니다.")
+    elif channel == "email":
+        pass
+    else:
+        raise ValueError(
+            "job_briefing.channel은 telegram, kakao, email 중 하나여야 합니다."
+        )
 
     print("완료! Gmail 받은편지함을 확인해 주세요.")
     return 0
