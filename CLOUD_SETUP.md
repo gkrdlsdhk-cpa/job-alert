@@ -223,10 +223,9 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-stock
 
 3. **SAVE** → **TEST RUN** → `204` 확인
 
-### 7-3. 하루 1회·백업
+### 7-3. 하루 1회
 
 - `stock_alert.py`가 `stock_daily_sent.json`으로 **당일 중복 발송** 방지 (TEST RUN·수동 실행도 스킵)
-- 평일 9시대 **Realtime Job Alerts**가 돌면 `stock_daily_guard`가 **아직 안 보냈을 때만** 1회 백업 시도
 
 ### 7-4. 주말
 

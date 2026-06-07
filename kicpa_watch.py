@@ -87,13 +87,6 @@ def main() -> int:
     load_dotenv()
     seed_only = "--seed" in sys.argv
     dry_run = "--dry-run" in sys.argv
-    if not seed_only and not dry_run:
-        try:
-            from src.stock_daily_guard import maybe_send_morning_stock_alert
-
-            maybe_send_morning_stock_alert()
-        except Exception as exc:
-            print(f"주가보고 백업 실패(회계사회 확인은 계속): {exc}", file=sys.stderr)
     try:
         return run_watch(seed_only=seed_only, dry_run=dry_run)
     except Exception as exc:

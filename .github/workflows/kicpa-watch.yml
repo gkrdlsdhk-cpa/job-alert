@@ -38,12 +38,10 @@ jobs:
             data/kpmg_notified.json
             data/ey_notified.json
             data/deloitte_notified.json
-            data/stock_daily_sent.json
           key: job-alert-watch-state-v2
           restore-keys: |
             job-alert-watch-state-v2
             job-alert-watch-state-v1
-            job-alert-stock-daily-v1
 
       - name: Check Kakao Secrets
         env:
@@ -64,15 +62,12 @@ jobs:
 
       - name: Run Realtime Job Alerts
         env:
-          STOCK_DAILY_STATE_FILE: data/stock_daily_sent.json
           KICPA_STATE_FILE: data/kicpa_notified.json
           PWC_STATE_FILE: data/pwc_graduate_state.json
           SARAMIN_STATE_FILE: data/saramin_notified.json
           KPMG_STATE_FILE: data/kpmg_notified.json
           EY_STATE_FILE: data/ey_notified.json
           DELOITTE_STATE_FILE: data/deloitte_notified.json
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
@@ -93,5 +88,4 @@ jobs:
             data/kpmg_notified.json
             data/ey_notified.json
             data/deloitte_notified.json
-            data/stock_daily_sent.json
           key: job-alert-watch-state-v2

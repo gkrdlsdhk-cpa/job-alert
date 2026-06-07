@@ -26,23 +26,12 @@ class WatchStep:
     pass_dry_run: bool = True
 
 
-def _run_kicpa(*, seed_only: bool = False, dry_run: bool = False) -> int:
-    if not seed_only and not dry_run:
-        try:
-            from src.stock_daily_guard import maybe_send_morning_stock_alert
-
-            maybe_send_morning_stock_alert()
-        except Exception as exc:
-            print(f"주가보고 백업 실패(회계사회 확인은 계속): {exc}", file=sys.stderr)
-    return kicpa_watch.run_watch(seed_only=seed_only, dry_run=dry_run)
-
-
 def _run_pwc(*, seed_only: bool = False, dry_run: bool = False) -> int:
     return pwc_watch.run_watch(seed_only=seed_only)
 
 
 WATCH_STEPS: list[WatchStep] = [
-    WatchStep("회계사회", _run_kicpa),
+    WatchStep("회계사회", kicpa_watch.run_watch),
     WatchStep("삼일PwC", _run_pwc, pass_dry_run=False),
     WatchStep("사람인 Big4", saramin_watch.run_watch),
     WatchStep("삼정KPMG", kpmg_watch.run_watch),
