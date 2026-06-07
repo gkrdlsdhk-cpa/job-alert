@@ -109,6 +109,11 @@ def send_saramin_job_alert(company: str, title: str, link: str) -> None:
     send_link_alert(f"[사람인 {company}]", title, link, button_title="공고 보기")
 
 
+def send_kpmg_career_alert(title: str, link: str) -> None:
+    """삼정 KPMG 채용 사이트 신입 공고 — 제목 + 링크."""
+    send_link_alert("[삼정KPMG 신입]", title, link, button_title="채용 보기")
+
+
 def send_pwc_recruitment_alert(title: str, link: str) -> None:
     """삼일PwC 정기채용 모집 오픈 — 제목 + 링크."""
     send_link_alert("[삼일PwC 정기채용]", title, link, button_title="채용 보기")

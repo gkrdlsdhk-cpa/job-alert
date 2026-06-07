@@ -48,6 +48,12 @@ pwc:
   watch_url: https://pwc.to/2xLHIx4
   poll_minutes: 15
 
+# 삼정 KPMG 채용 사이트 — 실시간 카카오 알림 (kpmg_watch.py, Realtime Job Alerts)
+kpmg_watch:
+  list_url: https://career.kr.kpmg.com/hr/rec/recruit/jobopen/controller/candidate/JobOpen310WebController/init.hr
+  receive_div_cd: N   # N=신입, E=경력, O=공채, A=전체
+  max_results: 50
+
 # 사람인 Big4 — 실시간 카카오 알림 (saramin_watch.py, Realtime Job Alerts)
 saramin_watch:
   max_fetch_per_company: 50

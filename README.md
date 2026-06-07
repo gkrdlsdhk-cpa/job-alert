@@ -6,6 +6,7 @@
 - **사람인 채용** (12시): 회계법인, 감사, Big4, CPA 키워드 공고
 - **한국공인회계사회 구인(수습CPA)**: 신규 공고 시 카카오 실시간 (`kicpa_watch.py`)
 - **삼일PwC 정기채용** ([링크](https://pwc.to/2xLHIx4)): 모집 오픈 시 카카오 실시간 (`pwc_watch.py`)
+- **사람인 Big4·삼정KPMG 채용 사이트**: 신규 공고 시 카카오 실시간 (`saramin_watch.py`, `kpmg_watch.py`)
 - **알림**: Gmail로 HTML 메일 발송
 
 ---
