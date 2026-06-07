@@ -48,6 +48,21 @@ pwc:
   watch_url: https://pwc.to/2xLHIx4
   poll_minutes: 15
 
+# 사람인 Big4 — 실시간 카카오 알림 (saramin_watch.py, Realtime Job Alerts)
+saramin_watch:
+  max_fetch_per_company: 50
+  exclude_title_contains:
+    - 경력
+  companies:
+    - search_keyword: 삼일회계법인
+      company_name: 삼일회계법인
+    - search_keyword: 삼정KPMG
+      company_name: 삼정KPMG
+    - search_keyword: 안진회계법인
+      company_name: 안진회계법인
+    - search_keyword: 한영회계법인
+      company_name: 한영회계법인
+
 # 미국 주식·지수 — 매일 9시 알림 (stock_alert.py, 네이버 증권)
 # channel: telegram (권장, CLOUD_SETUP.md §10) | kakao (나에게 보내기)
 stock_alert:

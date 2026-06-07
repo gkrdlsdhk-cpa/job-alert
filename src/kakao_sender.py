@@ -104,6 +104,11 @@ def send_kicpa_job_alert(title: str, link: str) -> None:
     send_link_alert("[회계사회 수습CPA 신규]", title, link, button_title="공고 보기")
 
 
+def send_saramin_job_alert(company: str, title: str, link: str) -> None:
+    """사람인 Big4 신규 공고 — 제목 + 링크."""
+    send_link_alert(f"[사람인 {company}]", title, link, button_title="공고 보기")
+
+
 def send_pwc_recruitment_alert(title: str, link: str) -> None:
     """삼일PwC 정기채용 모집 오픈 — 제목 + 링크."""
     send_link_alert("[삼일PwC 정기채용]", title, link, button_title="채용 보기")

@@ -109,7 +109,7 @@ GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
 - 카카오로 받으려면 `channel: kakao` + `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
 - **매일 09:00 KST** 자동 실행 → **§7 cron-job.org** 권장 (GitHub 내장 9시 cron은 자주 스킵됨)
 
-### 실시간 카카오 알림 (회계사회 + 삼일PwC 정기채용)
+### 실시간 카카오 알림 (회계사회 + 삼일PwC + 사람인 Big4)
 
 GitHub → **Actions** → **Realtime Job Alerts** → **Run workflow**
 
@@ -117,12 +117,14 @@ GitHub → **Actions** → **Realtime Job Alerts** → **Run workflow**
 |------|-----------|----------------|
 | 회계사회 구인(수습CPA) | 신규 공고 또는 **같은 ID에 제목·등록일 변경(재게시)** | `[회계사회 수습CPA 신규]` / `[재게시]…` + 공고 보기 |
 | 삼일PwC 정기채용 | 모집 오픈(지원 링크·모집 중 문구 등장) | `[삼일PwC 정기채용]` + 채용 보기 |
+| 사람인 Big4 (삼일·삼정KPMG·안진·한영) | **회사명 일치** 신규 공고 (`경력직` 제목 제외) | `[사람인 {회사명}]` + 공고 보기 |
 
 - **첫 실행(또는 캐시 없음)**: 그때 목록에 있던 공고만 등록 (알림 없음). **그 직후 올라온 글부터** 알림
+- 사람인: `config.yaml` → `saramin_watch.companies` (검색어 = 사람인 **회사명** 정확 일치)
 - 놓친 공고가 있으면 Actions 로그에 `기준선 등록` / `신규 N건` 확인
 - **이후 ~10분마다** 자동 확인 → **§6 외부 스케줄러** 권장 (GitHub 내장 10분 cron은 자주 스킵됨)
 - 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
-- 카카오 **제품 링크 관리** 웹 도메인: `https://www.kicpa.or.kr`, `https://www.pwc.com`
+- 카카오 **제품 링크 관리** 웹 도메인: `https://www.kicpa.or.kr`, `https://www.pwc.com`, `https://www.saramin.co.kr`
 
 ---
 
