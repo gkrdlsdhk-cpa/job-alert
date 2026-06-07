@@ -37,6 +37,7 @@ jobs:
             data/saramin_notified.json
             data/kpmg_notified.json
             data/ey_notified.json
+            data/deloitte_notified.json
             data/stock_daily_sent.json
           key: job-alert-watch-state-v2
           restore-keys: |
@@ -109,6 +110,15 @@ jobs:
           KAKAO_REDIRECT_URI: http://localhost:8080
         run: python ey_watch.py
 
+      - name: Watch Deloitte career site
+        env:
+          DELOITTE_STATE_FILE: data/deloitte_notified.json
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+          KAKAO_REDIRECT_URI: http://localhost:8080
+        run: python deloitte_watch.py
+
       - name: Save watch state
         uses: actions/cache/save@v4
         if: always()
@@ -119,5 +129,6 @@ jobs:
             data/saramin_notified.json
             data/kpmg_notified.json
             data/ey_notified.json
+            data/deloitte_notified.json
             data/stock_daily_sent.json
           key: job-alert-watch-state-v2

@@ -119,6 +119,11 @@ def send_ey_career_alert(title: str, link: str) -> None:
     send_link_alert("[EY한영 공채]", title, link, button_title="공고 보기")
 
 
+def send_deloitte_career_alert(title: str, link: str) -> None:
+    """딜로이트 채용 — 신입·Tax & Legal 검색 결과."""
+    send_link_alert("[딜로이트 Tax&Legal]", title, link, button_title="공고 보기")
+
+
 def send_pwc_recruitment_alert(title: str, link: str) -> None:
     """삼일PwC 정기채용 모집 오픈 — 제목 + 링크."""
     send_link_alert("[삼일PwC 정기채용]", title, link, button_title="채용 보기")

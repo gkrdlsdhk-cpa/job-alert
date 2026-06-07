@@ -48,6 +48,17 @@ pwc:
   watch_url: https://pwc.to/2xLHIx4
   poll_minutes: 15
 
+# 딜로이트(안진회계법인) 채용 — 실시간 카카오 알림 (deloitte_watch.py, Realtime Job Alerts)
+deloitte_watch:
+  home_url: https://join.deloitte.co.kr
+  exp_type: "1,3"          # 신입 (WiseRecruit 코드)
+  exp_type_label: 신입
+  service: AB               # Tax & Legal
+  service_label: Tax & Legal
+  keyword: ""
+  service_dtl: ""
+  max_results: 50
+
 # EY한영(한영회계법인) 채용 사이트 — 실시간 카카오 알림 (ey_watch.py, Realtime Job Alerts)
 ey_watch:
   home_url: https://eycareers-kr.recruiter.co.kr/career/home
