@@ -140,34 +140,70 @@ def _github_actions_run_url() -> str:
     return "https://github.com/gkrdlsdhk-cpa/job-alert/actions"
 
 
+_WATCH_FRIENDLY_NAMES = {
+    "회계사회": "회계사회",
+    "삼일PwC": "삼일PwC",
+    "사람인 Big4": "사람인",
+    "삼정KPMG": "삼정KPMG",
+    "EY한영": "EY한영",
+    "딜로이트": "딜로이트",
+}
+
+
+def _watch_friendly_name(label: str) -> str:
+    return _WATCH_FRIENDLY_NAMES.get(label, label)
+
+
+def _short_error_message(error: str, *, max_len: int = 60) -> str:
+    err = error.replace("\n", " ").strip()
+    if len(err) > max_len:
+        return err[: max_len - 1] + "…"
+    return err
+
+
+def _join_korean_names(names: list[str]) -> str:
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return f"{names[0]}, {names[1]}"
+    return ", ".join(names[:-1]) + f", {names[-1]}"
+
+
 def _format_watch_failure_summary(
     failures: list[tuple[int, str, str]],
     *,
     total_steps: int,
 ) -> str:
-    """카카오 200자 제한 안에서 step별 실패 내역 포맷."""
-    header = f"실패 {len(failures)}/{total_steps} step"
-    lines = [header]
-    for step_no, label, error in failures:
-        err = error.replace("\n", " ").strip()
-        if len(err) > 48:
-            err = err[:47] + "…"
-        lines.append(f"{step_no}. {label} — {err}")
+    """카카오 200자 제한 안에서 직관적인 실패 안내 문장."""
+    del total_steps  # 호출부 호환용
 
-    body = "\n".join(lines)
+    names = [_watch_friendly_name(label) for _, label, _ in failures]
+    joined = _join_korean_names(names)
+    headline = f"{joined}에서 확인에 실패했어요."
+
+    if len(failures) == 1:
+        err = _short_error_message(failures[0][2])
+        body = f"{headline}\n{err}" if err else headline
+    else:
+        detail_lines = [
+            f"· {_watch_friendly_name(label)}: {_short_error_message(error, max_len=40)}"
+            for _, label, error in failures
+        ]
+        body = headline + "\n" + "\n".join(detail_lines)
+
     prefix = "[Job Alert 오류]\n"
     max_body = KAKAO_TEXT_MAX - len(prefix) - 1
     if len(body) <= max_body:
         return body
 
-    # step 이름은 유지하고 오류 메시지만 줄여 재구성
-    compact: list[str] = [header]
-    for step_no, label, error in failures:
-        compact.append(f"{step_no}. {label}")
-    body = "\n".join(compact)
-    if len(body) <= max_body:
-        return body
-    return header + "\n" + ", ".join(label for _, label, _ in failures)
+    if len(failures) == 1:
+        room = max_body - len(headline) - 1
+        if room > 10:
+            err = _short_error_message(failures[0][2], max_len=room)
+            return f"{headline}\n{err}" if err else headline
+        return headline[:max_body]
+
+    return headline[:max_body]
 
 
 def send_realtime_watch_failure_alert(
