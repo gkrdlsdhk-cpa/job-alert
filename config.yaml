@@ -48,6 +48,13 @@ pwc:
   watch_url: https://pwc.to/2xLHIx4
   poll_minutes: 15
 
+# EY한영(한영회계법인) 채용 사이트 — 실시간 카카오 알림 (ey_watch.py, Realtime Job Alerts)
+ey_watch:
+  home_url: https://eycareers-kr.recruiter.co.kr/career/home
+  api_prefix: eycareers-kr.recruiter.co.kr
+  classification_tag_name: 공채
+  max_results: 50
+
 # 삼정 KPMG 채용 사이트 — 실시간 카카오 알림 (kpmg_watch.py, Realtime Job Alerts)
 kpmg_watch:
   list_url: https://career.kr.kpmg.com/hr/rec/recruit/jobopen/controller/candidate/JobOpen310WebController/init.hr
