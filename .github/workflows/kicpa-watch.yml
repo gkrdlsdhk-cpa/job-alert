@@ -2,11 +2,7 @@ name: Realtime Job Alerts
 
 on:
   # 10분 주기: cron-job.org 등 외부 스케줄러가 workflow_dispatch 호출 (CLOUD_SETUP.md §6)
-  # GitHub 내장 */10 cron은 실행이 자주 스킵되어 제거함
   workflow_dispatch:
-  schedule:
-    # 외부 스케줄러 장애 시 백업 (매시 7분 UTC ≈ 한국 매시 16분)
-    - cron: "7 * * * *"
 
 jobs:
   watch:

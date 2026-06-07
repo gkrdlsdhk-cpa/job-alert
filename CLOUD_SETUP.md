@@ -182,7 +182,7 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-realt
 
 - **10~15분** 후 Actions에 **workflow_dispatch**가 **10분 간격**으로 쌓이는지 확인
 - 공고가 없으면 실행만 되고 **카톡은 안 옴** (정상)
-- 워크플로에는 **매시 1회 백업 cron**만 남아 있음 — 외부 스케줄러가 멈춰도 최대 1시간마다 한 번은 확인
+- GitHub 내장 `schedule`은 사용하지 않음 — **cron-job.org만** 사용
 
 ### 6-5. 주의
 
