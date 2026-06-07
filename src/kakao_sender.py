@@ -129,6 +129,28 @@ def send_pwc_recruitment_alert(title: str, link: str) -> None:
     send_link_alert("[삼일PwC 정기채용]", title, link, button_title="채용 보기")
 
 
+def _github_actions_run_url() -> str:
+    server = os.getenv("GITHUB_SERVER_URL", "").strip().rstrip("/")
+    repository = os.getenv("GITHUB_REPOSITORY", "").strip()
+    run_id = os.getenv("GITHUB_RUN_ID", "").strip()
+    if server and repository and run_id:
+        return f"{server}/{repository}/actions/runs/{run_id}"
+    if repository:
+        return f"https://github.com/{repository}/actions"
+    return "https://github.com/gkrdlsdhk-cpa/job-alert/actions"
+
+
+def send_realtime_watch_failure_alert(failures: list[tuple[str, str]]) -> None:
+    """Realtime Job Alerts watch step 실패 요약 — 카카오 알림."""
+    summary = "; ".join(f"{name}: {error}" for name, error in failures)
+    send_link_alert(
+        "[Job Alert 오류]",
+        summary,
+        _github_actions_run_url(),
+        button_title="Actions 로그",
+    )
+
+
 def send_stock_quotes_alert(body: str, *, link: str | None = None) -> None:
     """테슬라·엔비디아 등 미국 주식 시세 — 나에게 보내기."""
     send_link_alert(

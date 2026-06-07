@@ -62,62 +62,25 @@ jobs:
             exit 1
           fi
 
-      - name: Watch KICPA trainee CPA jobs
+      - name: Run Realtime Job Alerts
         env:
           STOCK_DAILY_STATE_FILE: data/stock_daily_sent.json
           KICPA_STATE_FILE: data/kicpa_notified.json
+          PWC_STATE_FILE: data/pwc_graduate_state.json
+          SARAMIN_STATE_FILE: data/saramin_notified.json
+          KPMG_STATE_FILE: data/kpmg_notified.json
+          EY_STATE_FILE: data/ey_notified.json
+          DELOITTE_STATE_FILE: data/deloitte_notified.json
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
           KAKAO_REDIRECT_URI: http://localhost:8080
-        run: python kicpa_watch.py
-
-      - name: Watch Samil PwC graduate recruitment
-        env:
-          PWC_STATE_FILE: data/pwc_graduate_state.json
-          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
-          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
-          KAKAO_REDIRECT_URI: http://localhost:8080
-        run: python pwc_watch.py
-
-      - name: Watch Saramin Big4 jobs
-        env:
-          SARAMIN_STATE_FILE: data/saramin_notified.json
-          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
-          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
-          KAKAO_REDIRECT_URI: http://localhost:8080
-        run: python saramin_watch.py
-
-      - name: Watch Samjong KPMG career site
-        env:
-          KPMG_STATE_FILE: data/kpmg_notified.json
-          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
-          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
-          KAKAO_REDIRECT_URI: http://localhost:8080
-        run: python kpmg_watch.py
-
-      - name: Watch EY Han Young career site
-        env:
-          EY_STATE_FILE: data/ey_notified.json
-          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
-          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
-          KAKAO_REDIRECT_URI: http://localhost:8080
-        run: python ey_watch.py
-
-      - name: Watch Deloitte career site
-        env:
-          DELOITTE_STATE_FILE: data/deloitte_notified.json
-          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
-          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
-          KAKAO_REDIRECT_URI: http://localhost:8080
-        run: python deloitte_watch.py
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: python realtime_watch.py
 
       - name: Save watch state
         uses: actions/cache/save@v4

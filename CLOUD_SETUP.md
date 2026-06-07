@@ -129,6 +129,7 @@ GitHub → **Actions** → **Realtime Job Alerts** → **Run workflow**
 - 딜로이트: `config.yaml` → `deloitte_watch` (`exp_type: "1,3"`, `service: AB`)
 - 놓친 공고가 있으면 Actions 로그에 `기준선 등록` / `신규 N건` 확인
 - **이후 ~10분마다** 자동 확인 → **§6 외부 스케줄러** 권장 (GitHub 내장 10분 cron은 자주 스킵됨)
+- **watch 하나가 실패**해도 나머지는 계속 확인 (`realtime_watch.py`). 실패 시 `[Job Alert 오류]` 카카오 + Actions run 링크
 - 필요 Secret: `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
 - 카카오 **제품 링크 관리** 웹 도메인: `https://www.kicpa.or.kr`, `https://www.pwc.com`, `https://www.saramin.co.kr`, `https://career.kr.kpmg.com`, `https://eycareers-kr.recruiter.co.kr`, `https://join.deloitte.co.kr`
 
