@@ -1,72 +1,20 @@
 #!/usr/bin/env python3
-"""매일 실행: 뉴스 + 채용 수집 → Gmail 전체 브리핑 (+ 선택: 텔레그램/카카오 알림)."""
+"""레거시 진입점 — firm_news_briefing.py / saramin_briefing.py 로 분리되었습니다."""
 
 from __future__ import annotations
 
 import sys
-from pathlib import Path
-
-import yaml
-from dotenv import load_dotenv
-
-from src.email_sender import send_digest as send_email_digest
-from src.naver_news import fetch_company_news
-from src.saramin_jobs import fetch_all_jobs
-
-
-def load_config() -> dict:
-    config_path = Path(__file__).parent / "config.yaml"
-    with config_path.open(encoding="utf-8") as f:
-        return yaml.safe_load(f)
 
 
 def main() -> int:
-    load_dotenv()
-    config = load_config()
-    briefing_cfg = config.get("job_briefing") or {}
-    channel = (briefing_cfg.get("channel") or "telegram").strip().lower()
-
-    print("1/3 네이버 뉴스 수집 중...")
-    company_news = fetch_company_news(
-        companies=config["companies"],
-        news_per_keyword=config["naver"]["news_per_keyword"],
+    print(
+        "main.py는 더 이상 통합 브리핑을 실행하지 않습니다.\n"
+        "  • 회계법인 뉴스 (23시): python firm_news_briefing.py\n"
+        "  • 사람인 채용 (12시):   python saramin_briefing.py",
+        file=sys.stderr,
     )
-
-    print("2/3 사람인 채용 공고 수집 중...")
-    saramin_jobs = fetch_all_jobs(
-        keywords=config["saramin"]["search_keywords"],
-        max_results_per_keyword=config["saramin"]["max_results_per_keyword"],
-    )
-
-    news_count = sum(len(articles) for articles in company_news.values())
-    job_count = sum(len(jobs) for jobs in saramin_jobs.values())
-
-    print("3/3 알림 발송 중...")
-    email_to = send_email_digest(company_news, saramin_jobs)
-    print(f"Gmail 발송 완료 → {email_to}")
-
-    if channel == "telegram":
-        from src.telegram_sender import send_job_briefing_alert
-
-        send_job_briefing_alert(email_to, news_count=news_count, job_count=job_count)
-    elif channel == "kakao":
-        from src.kakao_sender import send_notification as send_kakao_notification
-
-        send_kakao_notification(email_to)
-    elif channel == "email":
-        pass
-    else:
-        raise ValueError(
-            "job_briefing.channel은 telegram, kakao, email 중 하나여야 합니다."
-        )
-
-    print("완료! Gmail 받은편지함을 확인해 주세요.")
-    return 0
+    return 1
 
 
 if __name__ == "__main__":
-    try:
-        raise SystemExit(main())
-    except Exception as exc:
-        print(f"오류: {exc}", file=sys.stderr)
-        raise SystemExit(1) from exc
+    raise SystemExit(main())

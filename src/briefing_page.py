@@ -7,6 +7,7 @@ from html import escape
 from pathlib import Path
 from urllib.parse import quote_plus
 
+
 def saramin_search_url(keyword: str) -> str:
     return (
         "https://www.saramin.co.kr/zf_user/search/recruit"
@@ -14,22 +15,73 @@ def saramin_search_url(keyword: str) -> str:
     )
 
 
-def render_html(
-    company_news: dict[str, list[dict]],
-    saramin_jobs: dict[str, list[dict]],
-) -> str:
+def _html_shell(*, page_title: str, heading: str, body: str) -> str:
     today = datetime.now()
     title_date = today.strftime("%Y년 %m월 %d일")
     updated = today.strftime("%Y-%m-%d %H:%M")
 
-    sections: list[str] = []
+    return f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{escape(page_title)} {title_date}</title>
+  <style>
+    * {{ box-sizing: border-box; }}
+    body {{
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #f5f6f8;
+      color: #222;
+      line-height: 1.5;
+    }}
+    .wrap {{
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }}
+    h1 {{ font-size: 1.35rem; margin: 0 0 4px; }}
+    .sub {{ color: #666; font-size: .9rem; margin-bottom: 20px; }}
+    h2 {{ font-size: 1.1rem; margin: 24px 0 12px; border-bottom: 2px solid #fee500; padding-bottom: 6px; }}
+    h3 {{ font-size: 1rem; margin: 16px 0 8px; color: #333; }}
+    ul {{ list-style: none; padding: 0; margin: 0; }}
+    li {{
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }}
+    li:last-child {{ border-bottom: none; }}
+    a {{ color: #1a1a1a; text-decoration: none; font-weight: 600; }}
+    a:hover {{ text-decoration: underline; }}
+    .meta {{ display: block; font-size: .82rem; color: #888; margin-top: 4px; font-weight: 400; }}
+    .desc {{ font-size: .88rem; color: #555; margin: 6px 0 0; }}
+    .empty {{ color: #888; font-size: .9rem; }}
+    .more {{ margin: 0 0 8px; font-size: .88rem; }}
+    .footer {{ margin-top: 24px; font-size: .78rem; color: #999; text-align: center; }}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>{escape(heading)}</h1>
+    <p class="sub">{title_date} · 업데이트 {updated}</p>
+    {body}
+    <p class="footer">job-alert 자동 생성</p>
+  </div>
+</body>
+</html>
+"""
 
-    sections.append(
-        f"""
+
+def render_news_html(company_news: dict[str, list[dict]]) -> str:
+    sections: list[str] = [
+        """
         <section>
           <h2>📰 Big4·회계법인 뉴스</h2>
         """
-    )
+    ]
     for company, articles in company_news.items():
         sections.append(f'<div class="company"><h3>{escape(company)}</h3>')
         if not articles:
@@ -49,12 +101,20 @@ def render_html(
         sections.append("</div>")
     sections.append("</section>")
 
-    sections.append(
+    return _html_shell(
+        page_title="회계법인 뉴스",
+        heading="📰 회계법인 뉴스",
+        body="\n".join(sections),
+    )
+
+
+def render_jobs_html(saramin_jobs: dict[str, list[dict]]) -> str:
+    sections: list[str] = [
         """
         <section>
           <h2>💼 사람인 채용</h2>
         """
-    )
+    ]
     for keyword, jobs in saramin_jobs.items():
         sections.append(f'<div class="company"><h3>키워드: {escape(keyword)}</h3>')
         sections.append(
@@ -78,7 +138,30 @@ def render_html(
         sections.append("</div>")
     sections.append("</section>")
 
-    body = "\n".join(sections)
+    return _html_shell(
+        page_title="사람인 채용",
+        heading="💼 사람인 채용",
+        body="\n".join(sections),
+    )
+
+
+def render_html(
+    company_news: dict[str, list[dict]],
+    saramin_jobs: dict[str, list[dict]],
+) -> str:
+    """레거시: 뉴스 + 채용 한 페이지."""
+    news_body = render_news_html(company_news)
+    jobs_body = render_jobs_html(saramin_jobs)
+    # strip outer html from jobs and append news section only - simpler to concat sections
+    today = datetime.now()
+    title_date = today.strftime("%Y년 %m월 %d일")
+    updated = today.strftime("%Y-%m-%d %H:%M")
+
+    news_section_start = news_body.find("<section>")
+    news_section_end = news_body.rfind("</section>") + len("</section>")
+    jobs_section_start = jobs_body.find("<section>")
+    jobs_section_end = jobs_body.rfind("</section>") + len("</section>")
+    body = news_body[news_section_start:news_section_end] + jobs_body[jobs_section_start:jobs_section_end]
 
     return f"""<!DOCTYPE html>
 <html lang="ko">

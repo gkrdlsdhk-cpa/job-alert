@@ -1,9 +1,9 @@
 # job-alert — 취업 뉴스·채용 자동 브리핑
 
-회계·Big4 취업 준비생을 위한 **매일 아침 이메일 브리핑** 프로젝트입니다.
+회계·Big4 취업 준비생을 위한 **매일 자동 브리핑** 프로젝트입니다.
 
-- **네이버 뉴스**: 삼일·안진·삼정·한영 등 관심 기업 기사
-- **사람인**: 회계법인, 감사, Big4, CPA 키워드 채용 공고
+- **회계법인 뉴스** (23시): 네이버 뉴스 — 삼일·삼정·안진·한영 당일 기사
+- **사람인 채용** (12시): 회계법인, 감사, Big4, CPA 키워드 공고
 - **한국공인회계사회 구인(수습CPA)**: 신규 공고 시 카카오 실시간 (`kicpa_watch.py`)
 - **삼일PwC 정기채용** ([링크](https://pwc.to/2xLHIx4)): 모집 오픈 시 카카오 실시간 (`pwc_watch.py`)
 - **알림**: Gmail로 HTML 메일 발송
@@ -90,14 +90,20 @@ EMAIL_TO=받을@gmail.com
 ```bash
 cd ~/job-alert
 source .venv/bin/activate
-python main.py
+python firm_news_briefing.py   # 회계법인 뉴스
+python saramin_briefing.py     # 사람인 채용
 ```
 
-성공하면 **"완료! 메일함을 확인해 주세요."** 가 나오고, Gmail 받은편지함에 브리핑 메일이 옵니다.
+성공하면 Gmail에 `[회계법인 뉴스]` / `[사람인 채용]` 메일이 각각 옵니다.
 
 ---
 
-## 8. 매일 오후 12시 자동 실행 (Mac)
+## 8. 매일 자동 실행 (Mac)
+
+| 브리핑 | 시간 | plist 예시 |
+|--------|------|------------|
+| 사람인 채용 | 12:00 | `com.jobalert.saramin.plist.example` |
+| 회계법인 뉴스 | 23:00 | `com.jobalert.firm-news.plist.example` |
 
 ### 8-1. 로그 폴더 만들기
 
@@ -105,31 +111,31 @@ python main.py
 mkdir -p ~/job-alert/logs
 ```
 
-### 8-2. 스케줄 파일 복사
+### 8-2. 스케줄 파일 복사 (사람인 12시 예시)
 
 ```bash
-cp ~/job-alert/com.jobalert.daily.plist.example ~/Library/LaunchAgents/com.jobalert.daily.plist
+cp ~/job-alert/com.jobalert.saramin.plist.example ~/Library/LaunchAgents/com.jobalert.saramin.plist
+cp ~/job-alert/com.jobalert.firm-news.plist.example ~/Library/LaunchAgents/com.jobalert.firm-news.plist
 ```
 
-`~/Library/LaunchAgents/com.jobalert.daily.plist` 를 열어  
-경로가 본인 사용자 이름(`kimhakin`)과 맞는지 확인하세요.
+각 plist에서 경로가 본인 사용자 이름과 맞는지 확인하세요.
 
 ### 8-3. 스케줄 등록
 
 ```bash
-launchctl load ~/Library/LaunchAgents/com.jobalert.daily.plist
+launchctl load ~/Library/LaunchAgents/com.jobalert.saramin.plist
+launchctl load ~/Library/LaunchAgents/com.jobalert.firm-news.plist
 ```
 
-매일 **오후 12시**에 Mac이 켜져 있으면 자동 실행됩니다.  
-(맥이 꺼져 있으면 그날은 실행되지 않습니다.)
+Mac이 켜져 있으면 **12시**(사람인) · **23시**(회계법인 뉴스)에 각각 실행됩니다.
 
 ### 시간 변경
 
-plist 파일에서 `<integer>12</integer>` (시), `<integer>0</integer>` (분)을 수정 후:
+plist에서 `<integer>12</integer>` / `<integer>23</integer>` (시) 등을 수정 후:
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.jobalert.daily.plist
-launchctl load ~/Library/LaunchAgents/com.jobalert.daily.plist
+launchctl unload ~/Library/LaunchAgents/com.jobalert.saramin.plist
+launchctl load ~/Library/LaunchAgents/com.jobalert.saramin.plist
 ```
 
 ---
@@ -147,10 +153,9 @@ launchctl load ~/Library/LaunchAgents/com.jobalert.daily.plist
 
 ## 9. 카카오톡으로 받기 (나에게 보내기, 선택)
 
-> **기본값은 텔레그램**입니다 (`config.yaml` → `job_briefing.channel: telegram`, `CLOUD_SETUP.md` **§10**).  
-> 12시 취업 브리핑을 카카오로 받으려면 아래 설정 후 `job_briefing.channel: kakao`로 바꾸세요.
+> **기본값은 텔레그램**입니다 (`firm_news_briefing` / `saramin_briefing` → `channel: telegram`).
 
-**카카오톡 '나와의 채팅'** 으로 브리핑 알림을 받을 수 있습니다. (Gmail 전체 내용은 그대로 발송)
+**카카오톡 '나와의 채팅'** 으로 브리핑 Gmail 확인 알림을 받을 수 있습니다.
 
 ### 9-1. 카카오 개발자 앱 만들기
 
@@ -171,7 +176,9 @@ KAKAO_REDIRECT_URI=http://localhost:8080
 `config.yaml`:
 
 ```yaml
-job_briefing:
+firm_news_briefing:
+  channel: kakao
+saramin_briefing:
   channel: kakao
 ```
 
@@ -189,7 +196,9 @@ python kakao_auth.py
 ### 9-4. 테스트
 
 ```bash
-python main.py
+python firm_news_briefing.py
+# 또는
+python saramin_briefing.py
 ```
 
 카카오톡 **'나와의 채팅'** 에 Gmail 확인 알림이 옵니다. (전체 내용은 Gmail)

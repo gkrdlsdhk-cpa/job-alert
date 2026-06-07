@@ -17,11 +17,11 @@ GMAIL_ICON_URL = "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico"
 KAKAO_TEXT_MAX = 200
 
 
-def gmail_briefing_url(email_to: str) -> str:
-    """본인 Gmail 계정에서 오늘 브리핑 메일 검색 화면으로 연결."""
+def gmail_briefing_url(email_to: str, *, mail_subject: str | None = None) -> str:
+    """본인 Gmail 계정에서 브리핑 메일 검색 화면으로 연결."""
     today = datetime.now().strftime("%Y-%m-%d")
     authuser = quote(email_to, safe="")
-    query = quote(f"[취업 브리핑] {today}", safe="")
+    query = quote(mail_subject or f"[취업 브리핑] {today}", safe="")
     return f"https://mail.google.com/mail/?authuser={authuser}#search/{query}"
 
 
@@ -57,28 +57,6 @@ def get_access_token() -> str:
         print(f"KAKAO_REFRESH_TOKEN={new_refresh}")
 
     return payload["access_token"]
-
-
-def _build_feed_template(email_to: str, mail_url: str, today: str) -> dict:
-    """피드 템플릿: 버튼/카드 클릭 시 Gmail 브리핑 검색으로 이동."""
-    link = {"web_url": mail_url, "mobile_web_url": mail_url}
-    return {
-        "object_type": "feed",
-        "content": {
-            "title": f"📋 취업 브리핑 ({today})",
-            "description": f"{email_to} 으로 전체 내용을 보냈어요.",
-            "image_url": GMAIL_ICON_URL,
-            "image_width": 64,
-            "image_height": 64,
-            "link": link,
-        },
-        "buttons": [
-            {
-                "title": "브리핑 메일 보기",
-                "link": link,
-            }
-        ],
-    }
 
 
 def _send_text_template(access_token: str, text: str, link: str, button_title: str) -> None:
@@ -169,12 +147,64 @@ def send_medication_alert(message: str, *, mark_taken_url: str) -> None:
     print("카카오톡 복약 알림 발송 완료")
 
 
-def send_notification(email_to: str) -> None:
-    """Gmail 브리핑 링크가 포함된 카카오 알림 1통."""
-    access_token = get_access_token()
+def send_firm_news_notification(email_to: str) -> None:
+    """회계법인 뉴스 Gmail 확인 카카오 알림."""
     today = datetime.now().strftime("%Y-%m-%d")
-    mail_url = gmail_briefing_url(email_to)
-    template = _build_feed_template(email_to, mail_url, today)
+    mail_url = gmail_briefing_url(email_to, mail_subject=f"[회계법인 뉴스] {today}")
+    _send_feed_alert(
+        email_to,
+        mail_url,
+        today,
+        card_title=f"📰 회계법인 뉴스 ({today})",
+    )
+
+
+def send_saramin_notification(email_to: str) -> None:
+    """사람인 채용 Gmail 확인 카카오 알림."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    mail_url = gmail_briefing_url(email_to, mail_subject=f"[사람인 채용] {today}")
+    _send_feed_alert(
+        email_to,
+        mail_url,
+        today,
+        card_title=f"💼 사람인 채용 ({today})",
+    )
+
+
+def send_notification(email_to: str) -> None:
+    """레거시: 통합 취업 브리핑 Gmail 확인 카카오 알림."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    mail_url = gmail_briefing_url(email_to, mail_subject=f"[취업 브리핑] {today}")
+    _send_feed_alert(
+        email_to,
+        mail_url,
+        today,
+        card_title=f"📋 취업 브리핑 ({today})",
+    )
+
+
+def _send_feed_alert(
+    email_to: str, mail_url: str, today: str, *, card_title: str
+) -> None:
+    access_token = get_access_token()
+    link = {"web_url": mail_url, "mobile_web_url": mail_url}
+    template = {
+        "object_type": "feed",
+        "content": {
+            "title": card_title,
+            "description": f"{email_to} 으로 전체 내용을 보냈어요.",
+            "image_url": GMAIL_ICON_URL,
+            "image_width": 64,
+            "image_height": 64,
+            "link": link,
+        },
+        "buttons": [
+            {
+                "title": "브리핑 메일 보기",
+                "link": link,
+            }
+        ],
+    }
 
     response = requests.post(
         KAKAO_MEMO_URL,

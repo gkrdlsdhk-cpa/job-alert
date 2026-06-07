@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.jobalert.daily</string>
+    <string>com.jobalert.firm-news</string>
     <key>ProgramArguments</key>
     <array>
         <string>/Users/kimhakin/job-alert/.venv/bin/python3</string>
-        <string>/Users/kimhakin/job-alert/saramin_briefing.py</string>
+        <string>/Users/kimhakin/job-alert/firm_news_briefing.py</string>
     </array>
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
-        <integer>12</integer>
+        <integer>23</integer>
         <key>Minute</key>
         <integer>0</integer>
     </dict>
     <key>StandardOutPath</key>
-    <string>/Users/kimhakin/job-alert/logs/run.log</string>
+    <string>/Users/kimhakin/job-alert/logs/firm-news-run.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/kimhakin/job-alert/logs/error.log</string>
+    <string>/Users/kimhakin/job-alert/logs/firm-news-error.log</string>
     <key>WorkingDirectory</key>
     <string>/Users/kimhakin/job-alert</string>
 </dict>

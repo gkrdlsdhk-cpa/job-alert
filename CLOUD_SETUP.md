@@ -1,6 +1,11 @@
-# 클라oud로 매일 12시 자동 발송 (GitHub Actions)
+# 클라oud 자동 발송 (GitHub Actions + cron-job.org)
 
-Mac이 꺼져 있어도 **cron-job.org**가 매일 **한국 시간 12:00**에 GitHub Actions로 `main.py`를 실행합니다.
+Mac이 꺼져 있어도 **cron-job.org**가 정해진 시간에 GitHub Actions를 호출합니다.
+
+| 브리핑 | 시간 (KST) | 스크립트 |
+|--------|------------|----------|
+| 회계법인 뉴스 | **23:00** | `firm_news_briefing.py` |
+| 사람인 채용 | **12:00** | `saramin_briefing.py` |
 
 ---
 
@@ -50,7 +55,7 @@ GitHub 저장소 → **Settings** → **Secrets and variables** → **Actions** 
 | `EMAIL_TO` | ✅ | 받을 Gmail (본인 주소) |
 | `TELEGRAM_BOT_TOKEN` | 텔레그램 알림 시 | BotFather 토큰 (**§10**) |
 | `TELEGRAM_CHAT_ID` | 텔레그램 알림 시 | 본인 chat id (**§10**) |
-| `KAKAO_REST_API_KEY` | 카카오 알림 시 | REST API 키 (실시간 공고·`job_briefing.channel: kakao`) |
+| `KAKAO_REST_API_KEY` | 카카오 알림 시 | REST API 키 (실시간 공고·`firm_news_briefing` / `saramin_briefing` channel: kakao) |
 | `KAKAO_REFRESH_TOKEN` | 카카오 알림 시 | refresh token |
 | `KAKAO_CLIENT_SECRET` | 선택 | Client Secret **사용** 중일 때만 |
 
@@ -60,17 +65,29 @@ GitHub 저장소 → **Settings** → **Secrets and variables** → **Actions** 
 
 ## 4. 수동 테스트
 
-### 매일 12시 브리핑 (뉴스 + 사람인)
+### 회계법인 뉴스 (매일 23시)
 
-GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
+GitHub → **Actions** → **회계법인 뉴스** → **Run workflow**
 
 1~2분 후:
-- **Gmail** `[취업 브리핑]` 메일 (뉴스 + 사람인)
-- **텔레그램** 「브리핑 메일 보기」 알림 (`job_briefing.channel: telegram`, 기본값)
+- **Gmail** `[회계법인 뉴스]` 메일 (Big4·회계법인 당일 기사)
+- **텔레그램** 「브리핑 메일 보기」 알림
 
-- 필요 Secret: Gmail 3개 + `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` (**§10**, 다른 알림과 동일 봇 가능)
-- 카카오로 받으려면 `config.yaml` → `job_briefing.channel: kakao` + `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`
-- **매일 12:00 KST** 자동 실행 → **§8 cron-job.org** 권장
+- 필요 Secret: 네이버 2개 + Gmail 3개 + `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
+- **매일 23:00 KST** 자동 실행 → **§8-1 cron-job.org**
+
+### 사람인 채용 (매일 12시)
+
+GitHub → **Actions** → **사람인 채용** → **Run workflow**
+
+1~2분 후:
+- **Gmail** `[사람인 채용]` 메일
+- **텔레그램** 「브리핑 메일 보기」 알림
+
+- 필요 Secret: Gmail 3개 + `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
+- **매일 12:00 KST** 자동 실행 → **§8-2 cron-job.org**
+
+> `Daily Job Briefing`(통합)은 **분리되었습니다.** cron-job.org에 `daily-briefing.yml` 잡이 있으면 **삭제**하고 아래 §8 표를 참고해 새로 만드세요.
 
 ### 오늘의 tax 브리핑
 
@@ -209,33 +226,49 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-stock
 
 ---
 
-## 8. 취업 브리핑 12시 — cron-job.org (권장)
+## 8. 회계법인 뉴스·사람인 채용 — cron-job.org (권장)
 
-GitHub 내장 12시 cron은 **몇 시간 늦게** 돌 수 있습니다.  
-**cron-job.org**에서 **매일 12:00 (KST)** 에 `Daily Job Briefing`을 호출하세요.
+GitHub 내장 cron은 **몇 시간 늦게** 돌 수 있습니다. **cron-job.org**에서 각각 호출하세요.
 
-> **같은 PAT** 사용. cron-job **잡을 하나 더** 만듭니다 (총 3개: 실시간·주가·브리핑).
+### 8-1. 회계법인 뉴스 (23시)
 
-### 8-1. 로컬 테스트 (선택)
+**로컬 테스트**
 
 ```bash
-chmod +x ~/job-alert/scripts/trigger-daily-briefing.sh
-GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-daily-briefing.sh
+chmod +x ~/job-alert/scripts/trigger-firm-news-briefing.sh
+GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-firm-news-briefing.sh
 ```
-
-### 8-2. cron-job.org — 세 번째 cronjob
 
 | 항목 | 값 |
 |------|-----|
-| **Title** | `job alert briefing 12pm` |
-| **URL** | `https://api.github.com/repos/gkrdlsdhk-cpa/job-alert/actions/workflows/daily-briefing.yml/dispatches` |
-| **Schedule** | Custom crontab: `0 12 * * *` |
+| **Title** | `job alert firm news 11pm` |
+| **URL** | `https://api.github.com/repos/gkrdlsdhk-cpa/job-alert/actions/workflows/firm-news-briefing.yml/dispatches` |
+| **Schedule** | `0 23 * * *` |
 | **Time zone** | `Asia/Seoul` |
 | **Request method** | **POST** |
 | **Headers** | §6과 동일 |
 | **Request body** | `{"ref":"main"}` |
 
-**SAVE** → **TEST RUN** → `204` → Actions에 **Daily Job Briefing** 1회 확인.
+### 8-2. 사람인 채용 (12시)
+
+**로컬 테스트**
+
+```bash
+chmod +x ~/job-alert/scripts/trigger-saramin-briefing.sh
+GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-saramin-briefing.sh
+```
+
+| 항목 | 값 |
+|------|-----|
+| **Title** | `job alert saramin 12pm` |
+| **URL** | `https://api.github.com/repos/gkrdlsdhk-cpa/job-alert/actions/workflows/saramin-briefing.yml/dispatches` |
+| **Schedule** | `0 12 * * *` |
+| **Time zone** | `Asia/Seoul` |
+| **Request method** | **POST** |
+| **Headers** | §6과 동일 |
+| **Request body** | `{"ref":"main"}` |
+
+> 기존 `job alert briefing 12pm` (`daily-briefing.yml`) cronjob은 **삭제**하고 위 **8-2** URL로 교체하세요.
 
 ### 8-3. cron-job 요약 (아래 §9 복약 포함)
 
@@ -243,11 +276,12 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-daily
 |-------|----------------|----------|
 | job alert realtime | `*/10 9-18 * * 1-5` (평일 9~19시 10분) | `kicpa-watch.yml` |
 | job alert stock 9am | `0 9 * * *` (매일 9시) | `stock-alert.yml` |
-| job alert briefing 12pm | `0 12 * * *` (매일 12시) | `daily-briefing.yml` |
+| job alert saramin 12pm | `0 12 * * *` (매일 12시) | `saramin-briefing.yml` |
 | job alert medication 10am | `0 10 * * *` (매일 10시) | `medication-alert.yml` |
+| job alert firm news 11pm | `0 23 * * *` (매일 23시) | `firm-news-briefing.yml` |
 | job alert taxwatch 11pm | `0 23 * * *` (매일 23시) | `taxwatch-briefing.yml` |
 
-브리핑 **텔레그램만 끄려면** `config.yaml` → `job_briefing.channel: email`.
+텔레그램만 끄려면 `config.yaml` → `firm_news_briefing.channel: email` 또는 `saramin_briefing.channel: email`.
 
 ### 8-4. 오늘의 tax 브리핑 (매일 23시)
 
@@ -346,7 +380,7 @@ mark_taken_url: "https://script.google.com/macros/s/XXXX/exec?key=my-med-secret-
 ## 10. 텔레그램 — 복약·주가·취업·tax 브리핑 (권장)
 
 복약 알림은 카카오와 달리 **채팅 안 「복용 완료 ✅」 버튼** 한 번으로 체크됩니다.  
-주가·취업·tax 브리핑(`stock_alert`, `job_briefing`, `taxwatch_briefing` → `channel: telegram`)도 **같은 봇·chat_id**로 받을 수 있습니다.
+주가·회계법인·사람인·tax 브리핑(`stock_alert`, `firm_news_briefing`, `saramin_briefing`, `taxwatch_briefing` → `channel: telegram`)도 **같은 봇·chat_id**로 받을 수 있습니다.
 
 ### 10-1. 봇 만들기
 
@@ -376,7 +410,10 @@ medication_alert:
   channel: telegram
   message: "아침 약 드실 시간이에요."
 
-job_briefing:
+firm_news_briefing:
+  channel: telegram
+
+saramin_briefing:
   channel: telegram
 
 stock_alert:

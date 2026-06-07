@@ -1,11 +1,11 @@
-name: Daily Job Briefing
+name: 사람인 채용
 
 on:
-  # 매일 12:00 KST: cron-job.org가 workflow_dispatch 호출 (CLOUD_SETUP.md §8)
+  # 매일 12:00 KST: cron-job.org가 workflow_dispatch 호출 (CLOUD_SETUP.md §8-2)
   workflow_dispatch:
 
 jobs:
-  briefing:
+  saramin:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -23,8 +23,6 @@ jobs:
 
       - name: Check GitHub Secrets
         env:
-          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
-          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
@@ -32,13 +30,13 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           missing=""
-          for name in NAVER_CLIENT_ID NAVER_CLIENT_SECRET EMAIL_FROM EMAIL_PASSWORD EMAIL_TO; do
+          for name in EMAIL_FROM EMAIL_PASSWORD EMAIL_TO; do
             eval "val=\$$name"
             if [ -z "$val" ]; then
               missing="$missing $name"
             fi
           done
-          channel=$(python3 -c "import yaml; print((yaml.safe_load(open('config.yaml')) or {}).get('job_briefing', {}).get('channel', 'telegram'))")
+          channel=$(python3 -c "import yaml; print((yaml.safe_load(open('config.yaml')) or {}).get('saramin_briefing', {}).get('channel', 'telegram'))")
           if [ "$channel" = "telegram" ]; then
             for name in TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID; do
               eval "val=\$$name"
@@ -54,10 +52,8 @@ jobs:
             exit 1
           fi
 
-      - name: Run job-alert
+      - name: Run saramin briefing
         env:
-          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
-          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
@@ -69,4 +65,4 @@ jobs:
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
           KAKAO_REDIRECT_URI: http://localhost:8080
-        run: python main.py
+        run: python saramin_briefing.py

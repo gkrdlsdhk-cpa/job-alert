@@ -31,7 +31,7 @@ git commit -m "Use Kakao feed template for Gmail link button"
 git push
 ```
 
-GitHub → **Actions** → **Daily Job Briefing** → **Run workflow**
+GitHub → **Actions** → **회계법인 뉴스** 또는 **사람인 채용** → **Run workflow**
 
 ---
 

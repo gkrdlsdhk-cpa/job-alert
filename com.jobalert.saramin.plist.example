@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.jobalert.daily</string>
+    <string>com.jobalert.saramin</string>
     <key>ProgramArguments</key>
     <array>
         <string>/Users/kimhakin/job-alert/.venv/bin/python3</string>
@@ -17,9 +17,9 @@
         <integer>0</integer>
     </dict>
     <key>StandardOutPath</key>
-    <string>/Users/kimhakin/job-alert/logs/run.log</string>
+    <string>/Users/kimhakin/job-alert/logs/saramin-run.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/kimhakin/job-alert/logs/error.log</string>
+    <string>/Users/kimhakin/job-alert/logs/saramin-error.log</string>
     <key>WorkingDirectory</key>
     <string>/Users/kimhakin/job-alert</string>
 </dict>

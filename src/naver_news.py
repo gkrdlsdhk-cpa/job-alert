@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime
-from html import unescape
 import re
+from datetime import date, datetime
+from html import unescape
+from zoneinfo import ZoneInfo
 
 import requests
 
-
 NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json"
+KST = ZoneInfo("Asia/Seoul")
 
 
 def _strip_html(text: str) -> str:
@@ -18,7 +19,18 @@ def _strip_html(text: str) -> str:
     return unescape(clean).strip()
 
 
-def fetch_news(keyword: str, display: int = 3) -> list[dict]:
+def _today_kst() -> date:
+    return datetime.now(KST).date()
+
+
+def _parse_pub_date(pub_date: str) -> datetime | None:
+    try:
+        return datetime.strptime(pub_date, "%a, %d %b %Y %H:%M:%S %z")
+    except ValueError:
+        return None
+
+
+def fetch_news(keyword: str, *, display: int = 50, sort: str = "date") -> list[dict]:
     """키워드로 네이버 뉴스 검색. API 키가 없으면 빈 목록 반환."""
     client_id = os.getenv("NAVER_CLIENT_ID", "").strip()
     client_secret = os.getenv("NAVER_CLIENT_SECRET", "").strip()
@@ -31,8 +43,8 @@ def fetch_news(keyword: str, display: int = 3) -> list[dict]:
     }
     params = {
         "query": keyword,
-        "display": display,
-        "sort": "date",
+        "display": min(max(display, 1), 100),
+        "sort": sort,
     }
 
     response = requests.get(NAVER_NEWS_URL, headers=headers, params=params, timeout=15)
@@ -42,11 +54,13 @@ def fetch_news(keyword: str, display: int = 3) -> list[dict]:
     results = []
     for item in items:
         pub_date = item.get("pubDate", "")
-        try:
-            published = datetime.strptime(pub_date, "%a, %d %b %Y %H:%M:%S %z")
-            published_str = published.strftime("%Y-%m-%d")
-        except ValueError:
+        published_dt = _parse_pub_date(pub_date)
+        if published_dt:
+            published_str = published_dt.astimezone(KST).strftime("%Y-%m-%d")
+            published_date = published_dt.astimezone(KST).date()
+        else:
             published_str = pub_date
+            published_date = None
 
         results.append(
             {
@@ -54,16 +68,24 @@ def fetch_news(keyword: str, display: int = 3) -> list[dict]:
                 "link": item.get("link", ""),
                 "description": _strip_html(item.get("description", "")),
                 "published": published_str,
+                "published_date": published_date,
                 "source_keyword": keyword,
             }
         )
     return results
 
 
-def fetch_company_news(companies: list[dict], news_per_keyword: int) -> dict[str, list[dict]]:
+def fetch_company_news(
+    companies: list[dict],
+    *,
+    max_fetch_per_keyword: int = 50,
+    today_only: bool = True,
+    sort: str = "date",
+) -> dict[str, list[dict]]:
     """기업별 뉴스 수집. 같은 링크는 한 번만 포함."""
     by_company: dict[str, list[dict]] = {}
     seen_links: set[str] = set()
+    today = _today_kst()
 
     for company in companies:
         name = company["name"]
@@ -71,9 +93,16 @@ def fetch_company_news(companies: list[dict], news_per_keyword: int) -> dict[str
         articles: list[dict] = []
 
         for keyword in keywords:
-            for article in fetch_news(keyword, display=news_per_keyword):
+            for article in fetch_news(
+                keyword, display=max_fetch_per_keyword, sort=sort
+            ):
+                if today_only:
+                    pub_date = article.get("published_date")
+                    if pub_date is None or pub_date != today:
+                        continue
+
                 link = article["link"]
-                if link in seen_links:
+                if not link or link in seen_links:
                     continue
                 seen_links.add(link)
                 articles.append(article)
