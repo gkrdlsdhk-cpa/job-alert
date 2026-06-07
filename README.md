@@ -303,11 +303,9 @@ GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
 
 종목 변경은 `config.yaml` → `stock_alert.symbols` 에서 `naver_code`(예: `TSLA.O`)를 수정합니다.
 
-### 12-5. 매일 9시 복약 알림 (텔레그램 권장)
+### 12-5. 매일 복약 알림 (텔레그램)
 
 - **텔레그램** 채팅 안 **복용 완료 ✅** 버튼 → `CLOUD_SETUP.md` **10번**
-- **11시**까지 미체크 시 재알림 1회
-- 카카오+GAS: `channel: kakao` + **9번**
 
 ---
 

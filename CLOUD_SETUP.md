@@ -278,7 +278,7 @@ GITHUB_TOKEN=github_pat_여기에_붙여넣기 ~/job-alert/scripts/trigger-saram
 
 > 기존 `job alert briefing 12pm` (`daily-briefing.yml`) cronjob은 **삭제**하고 위 **8-2** URL로 교체하세요.
 
-### 8-3. cron-job 요약 (아래 §9 복약 포함)
+### 8-3. cron-job 요약 (복약은 §10)
 
 | Title | Schedule (KST) | 워크플로 |
 |-------|----------------|----------|
@@ -323,71 +323,9 @@ python taxwatch_briefing.py
 
 ---
 
-## 9. 복약 알림 9시 + 복용 완료 버튼
-
-매일 **09:00** 카카오 알림 → **「복용 완료 ✅」** 버튼 → 체크 시 “오늘 복용함” 기록.  
-**11:00**까지 체크 없으면 **1회** 재알림.
-
-### 9-1. Google Apps Script (버튼 → 체크 기록)
-
-1. [script.google.com](https://script.google.com) → 새 프로젝트
-2. `scripts/medication-mark-gas.gs` 내용 붙여넣기
-3. **프로젝트 설정 → 스크립트 속성** 추가:
-
-| 속성 | 값 |
-|------|-----|
-| `MARK_SECRET` | 임의 비밀 문자열 (예: `my-med-secret-42`) |
-| `GITHUB_PAT` | job-alert용 `github_pat_...` (Actions Read and write) |
-| `GITHUB_REPO` | `gkrdlsdhk-cpa/job-alert` |
-
-4. **배포 → 새 배포 → 웹 앱** (실행: 나, 액세스: **모든 사용자**)
-5. 배포 URL 예: `https://script.google.com/macros/s/XXXX/exec`
-6. GitHub → **Secrets** → `MEDICATION_MARK_SECRET` = 위 `MARK_SECRET` 과 **동일**
-7. `config.yaml` → `medication_alert.mark_taken_url`:
-
-```yaml
-mark_taken_url: "https://script.google.com/macros/s/XXXX/exec?key=my-med-secret-42"
-```
-
-8. push 후 카카오 **제품 링크 관리** 웹 도메인: `https://script.google.com`
-
-### 9-2. cron-job.org — 복약 cronjob 2개
-
-**아침 알림 (9시)**
-
-| 항목 | 값 |
-|------|-----|
-| **Title** | `job alert medication 9am` |
-| **URL** | `.../medication-alert.yml/dispatches` |
-| **Schedule** | `0 9 * * *` / `Asia/Seoul` |
-| **ADVANCED** | §6과 동일 |
-
-**후속 알림 (11시, 체크 없을 때만)**
-
-| 항목 | 값 |
-|------|-----|
-| **Title** | `job alert medication 11am` |
-| **URL** | `.../medication-followup.yml/dispatches` |
-| **Schedule** | `0 11 * * *` / `Asia/Seoul` |
-| **ADVANCED** | §6과 동일 |
-
-### 9-3. 동작 확인
-
-1. **9시** 카카오 → **복용 완료 ✅** 버튼
-2. 버튼 탭 → 브라우저 **「✅ 복용 완료」** → Actions **Medication Mark Taken** 실행
-3. **11시** 전에 체크했으면 후속 알림 **안 옴** / 안 했으면 **재알림 1통**
-
-### 9-4. 메시지 변경 (선택)
-
-`config.yaml` → `medication_alert.message`, `follow_up_message`
-
-> **텔레그램 사용 시** → 아래 **§10** (채팅 안 버튼, GAS 불필요). `config.yaml` → `channel: telegram`
-
----
-
 ## 10. 텔레그램 — 복약·주가·취업·tax 브리핑 (권장)
 
-복약 알림은 카카오와 달리 **채팅 안 「복용 완료 ✅」 버튼** 한 번으로 체크됩니다.  
+복약 알림은 **텔레그램 전용**입니다. 채팅 안 **「복용 완료 ✅」** 버튼으로 체크합니다.  
 주가·회계법인·사람인·tax 브리핑(`stock_alert`, `firm_news_briefing`, `saramin_briefing`, `taxwatch_briefing` → `channel: telegram`)도 **같은 봇·chat_id**로 받을 수 있습니다.
 
 ### 10-1. 봇 만들기
@@ -415,7 +353,6 @@ python scripts/telegram_get_chat_id.py
 
 ```yaml
 medication_alert:
-  channel: telegram
   message: "아침 약 드실 시간이에요."
 
 firm_news_briefing:

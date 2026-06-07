@@ -1,4 +1,4 @@
-"""복약 알림 — 당일 발송·복용 체크 상태."""
+"""복약 알림 — 당일 발송 상태."""
 
 from __future__ import annotations
 
@@ -23,17 +23,10 @@ def _today_kst() -> str:
     return datetime.now(KST).strftime("%Y-%m-%d")
 
 
-def _now_kst_iso() -> str:
-    return datetime.now(KST).isoformat(timespec="seconds")
-
-
 def _empty_state() -> dict:
     return {
         "date": _today_kst(),
         "morning_sent": False,
-        "taken": False,
-        "taken_at": None,
-        "followup_sent": False,
     }
 
 
@@ -61,20 +54,5 @@ def save_state(state: dict) -> None:
 def mark_morning_sent() -> dict:
     state = load_state()
     state["morning_sent"] = True
-    save_state(state)
-    return state
-
-
-def mark_taken() -> dict:
-    state = load_state()
-    state["taken"] = True
-    state["taken_at"] = _now_kst_iso()
-    save_state(state)
-    return state
-
-
-def mark_followup_sent() -> dict:
-    state = load_state()
-    state["followup_sent"] = True
     save_state(state)
     return state

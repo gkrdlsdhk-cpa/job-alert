@@ -13,9 +13,6 @@ def deliver_morning(message: str) -> None:
     if state.get("morning_sent"):
         print("복약(텔레그램): 오늘 아침 알림 이미 발송함 — 건너뜀.")
         return
-    if state.get("taken"):
-        print("복약(텔레그램): 오늘 이미 복용 체크됨 — 건너뜀.")
-        return
 
     message_id = send_medication_reminder(message)
     state = mark_morning_sent()

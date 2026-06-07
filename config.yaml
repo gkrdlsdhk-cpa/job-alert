@@ -138,10 +138,6 @@ taxwatch_briefing:
       - section: 오피니언
         list_url: https://www.intn.co.kr/news/articleList.html?sc_section_code=S1N8&view_type=sm
 
-# 복약 알림 — 매일 9시 (cron-job.org, CLOUD_SETUP.md §10)
-# channel: telegram (채팅 안 복용 완료 버튼) | kakao (GAS 링크, §9)
+# 복약 알림 — 매일 (cron-job.org → medication-alert.yml, CLOUD_SETUP.md §10)
 medication_alert:
-  channel: telegram
   message: "아침 약 드실 시간이에요."
-  follow_up_message: "아직 복용 체크가 없어요. 아래 버튼을 눌러 주세요."
-  mark_taken_url: ""
