@@ -31,7 +31,10 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: data/stock_daily_sent.json
-          key: job-alert-stock-daily-v1
+          key: job-alert-stock-daily-v1-${{ github.run_id }}
+          restore-keys: |
+            job-alert-stock-daily-v1-
+            job-alert-stock-daily-v1
 
       - name: Check Telegram Secrets
         env:
@@ -58,4 +61,4 @@ jobs:
         if: always()
         with:
           path: data/stock_daily_sent.json
-          key: job-alert-stock-daily-v1
+          key: job-alert-stock-daily-v1-${{ github.run_id }}

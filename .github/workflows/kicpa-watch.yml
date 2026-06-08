@@ -34,8 +34,9 @@ jobs:
             data/kpmg_notified.json
             data/ey_notified.json
             data/deloitte_notified.json
-          key: job-alert-watch-state-v2
+          key: job-alert-watch-state-v2-${{ github.run_id }}
           restore-keys: |
+            job-alert-watch-state-v2-
             job-alert-watch-state-v2
             job-alert-watch-state-v1
 
@@ -84,4 +85,4 @@ jobs:
             data/kpmg_notified.json
             data/ey_notified.json
             data/deloitte_notified.json
-          key: job-alert-watch-state-v2
+          key: job-alert-watch-state-v2-${{ github.run_id }}
