@@ -6,7 +6,7 @@ import json
 import os
 from pathlib import Path
 
-from src.kicpa_state import apply_jobs_to_snapshots, job_fingerprint
+from src.kicpa_state import apply_jobs_to_snapshots, job_fingerprint, load_notified_fingerprints
 
 DEFAULT_STATE_PATH = (
     Path(__file__).resolve().parent.parent / "data" / "ey_notified.json"
@@ -24,6 +24,7 @@ def load_state() -> dict:
         return {
             "initialized": True,
             "job_snapshots": {},
+            "notified_fingerprints": {},
             "needs_baseline": True,
         }
     try:
@@ -32,15 +33,18 @@ def load_state() -> dict:
         return {
             "initialized": True,
             "job_snapshots": {},
+            "notified_fingerprints": {},
             "needs_baseline": True,
         }
 
     snapshots = data.get("job_snapshots", {})
     if not isinstance(snapshots, dict):
         snapshots = {}
+    snapshots = {str(k): str(v) for k, v in snapshots.items() if k and v}
     return {
         "initialized": True,
-        "job_snapshots": {str(k): str(v) for k, v in snapshots.items() if k and v},
+        "job_snapshots": snapshots,
+        "notified_fingerprints": load_notified_fingerprints(data, snapshots),
         "needs_baseline": bool(data.get("needs_baseline", False)),
     }
 
@@ -51,9 +55,21 @@ def save_state(state: dict) -> None:
     snapshots = state.get("job_snapshots", {})
     if not isinstance(snapshots, dict):
         snapshots = {}
+    snapshots = {str(k): str(v) for k, v in snapshots.items() if k and v}
+
+    notified = state.get("notified_fingerprints", {})
+    if not isinstance(notified, dict):
+        notified = {}
+    trimmed_notified = {
+        job_id: notified[job_id]
+        for job_id in snapshots
+        if job_id in notified and notified[job_id]
+    }
+
     payload = {
         "initialized": True,
-        "job_snapshots": {str(k): str(v) for k, v in snapshots.items() if k and v},
+        "job_snapshots": snapshots,
+        "notified_fingerprints": trimmed_notified,
     }
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 

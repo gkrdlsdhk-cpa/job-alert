@@ -38,12 +38,50 @@ def _migrate_legacy(data: dict) -> dict[str, str]:
     return snapshots
 
 
+def _mark_notified(notified: dict[str, list[str]], job_id: str, fp: str) -> None:
+    if not fp:
+        return
+    items = notified.setdefault(job_id, [])
+    if fp not in items:
+        items.append(fp)
+    if len(items) > 10:
+        notified[job_id] = items[-10:]
+
+
+def _already_notified(notified: dict[str, list[str]], job_id: str, fp: str) -> bool:
+    return fp in notified.get(job_id, [])
+
+
+def load_notified_fingerprints(
+    data: dict,
+    snapshots: dict[str, str],
+) -> dict[str, list[str]]:
+    """저장된 알림 이력 로드. 없으면 현재 스냅샷을 이미 알림 보낸 것으로 간주."""
+    raw = data.get("notified_fingerprints")
+    if isinstance(raw, dict) and raw:
+        notified: dict[str, list[str]] = {}
+        for job_id, fps in raw.items():
+            if not job_id or not isinstance(fps, list):
+                continue
+            cleaned = [str(fp) for fp in fps if fp]
+            if cleaned:
+                notified[str(job_id)] = cleaned
+        return notified
+
+    notified = {}
+    for job_id, fp in snapshots.items():
+        if fp:
+            _mark_notified(notified, str(job_id), str(fp))
+    return notified
+
+
 def load_state() -> dict:
     path = state_path()
     if not path.is_file():
         return {
             "initialized": True,
             "job_snapshots": {},
+            "notified_fingerprints": {},
             "needs_baseline": True,
         }
     try:
@@ -52,6 +90,7 @@ def load_state() -> dict:
         return {
             "initialized": True,
             "job_snapshots": {},
+            "notified_fingerprints": {},
             "needs_baseline": True,
         }
 
@@ -59,6 +98,7 @@ def load_state() -> dict:
     return {
         "initialized": True,
         "job_snapshots": snapshots,
+        "notified_fingerprints": load_notified_fingerprints(data, snapshots),
         "needs_baseline": bool(data.get("needs_baseline", False)),
     }
 
@@ -72,9 +112,21 @@ def save_state(state: dict) -> None:
     items = [(str(k), str(v)) for k, v in snapshots.items() if k and v]
     if len(items) > MAX_STORED_JOBS:
         items = items[-MAX_STORED_JOBS:]
+    snapshots = dict(items)
+
+    notified = state.get("notified_fingerprints", {})
+    if not isinstance(notified, dict):
+        notified = {}
+    trimmed_notified = {
+        job_id: notified[job_id]
+        for job_id in snapshots
+        if job_id in notified and notified[job_id]
+    }
+
     payload = {
         "initialized": True,
-        "job_snapshots": dict(items),
+        "job_snapshots": snapshots,
+        "notified_fingerprints": trimmed_notified,
     }
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -82,15 +134,18 @@ def save_state(state: dict) -> None:
 def apply_jobs_to_snapshots(
     jobs: list[dict],
     snapshots: dict[str, str],
+    notified: dict[str, list[str]],
     *,
     baseline: bool = False,
-) -> tuple[list[tuple[dict, str]], dict[str, str]]:
+) -> tuple[list[tuple[dict, str]], dict[str, str], dict[str, list[str]]]:
     """
     공고 목록과 스냅샷을 비교합니다.
 
-    반환: (알림 대상 [(job, 사유), ...], 갱신된 스냅샷)
+    같은 job_id라도 fingerprint(제목·등록일)가 바뀌면 수정·재게시 알림 —
+    단, 그 fingerprint로는 이미 알림을 보낸 적 없을 때만 1회 발송.
     """
     updated = dict(snapshots)
+    notified_updated = {k: list(v) for k, v in notified.items()}
     to_notify: list[tuple[dict, str]] = []
 
     for job in jobs:
@@ -102,16 +157,21 @@ def apply_jobs_to_snapshots(
 
         if baseline:
             updated[job_id] = fp
+            _mark_notified(notified_updated, job_id, fp)
             continue
 
         if old is None:
-            to_notify.append((job, "신규"))
+            if not _already_notified(notified_updated, job_id, fp):
+                to_notify.append((job, "신규"))
             updated[job_id] = fp
+            _mark_notified(notified_updated, job_id, fp)
         elif old == LEGACY_MARKER:
             updated[job_id] = fp
+            _mark_notified(notified_updated, job_id, fp)
         elif old != fp:
-            # 제목·등록일 표기가 사이트마다 조금씩 바뀌면 매 폴링마다 재알림될 수 있어
-            # 스냅샷만 갱신하고 카카오는 보내지 않음 (신규 job_id만 알림)
             updated[job_id] = fp
+            if not _already_notified(notified_updated, job_id, fp):
+                to_notify.append((job, "수정·재게시"))
+            _mark_notified(notified_updated, job_id, fp)
 
-    return to_notify, updated
+    return to_notify, updated, notified_updated

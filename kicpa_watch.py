@@ -22,10 +22,20 @@ def load_config() -> dict:
 
 def _baseline_current_jobs(jobs_with_id: list[dict], *, reason: str) -> int:
     state = load_state()
-    _, snapshots = apply_jobs_to_snapshots(
-        jobs_with_id, state.get("job_snapshots", {}), baseline=True
+    _, snapshots, notified = apply_jobs_to_snapshots(
+        jobs_with_id,
+        state.get("job_snapshots", {}),
+        state.get("notified_fingerprints", {}),
+        baseline=True,
     )
-    save_state({"initialized": True, "job_snapshots": snapshots, "needs_baseline": False})
+    save_state(
+        {
+            "initialized": True,
+            "job_snapshots": snapshots,
+            "notified_fingerprints": notified,
+            "needs_baseline": False,
+        }
+    )
     print(
         f"기준선 등록 ({reason}) — 화면에 있던 {len(snapshots)}건 "
         f"(job_id+제목+등록일) 저장. 이후 변경·신규만 카카오 알림."
@@ -44,6 +54,7 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
 
     state = load_state()
     snapshots = state.get("job_snapshots", {})
+    notified = state.get("notified_fingerprints", {})
 
     if seed_only:
         return _baseline_current_jobs(jobs_with_id, reason="--seed")
@@ -54,7 +65,9 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
             reason="상태 파일 없음(캐시 미복구 — 이번 목록만 기준선)",
         )
 
-    to_notify, snapshots = apply_jobs_to_snapshots(jobs_with_id, snapshots, baseline=False)
+    to_notify, snapshots, notified = apply_jobs_to_snapshots(
+        jobs_with_id, snapshots, notified, baseline=False
+    )
 
     if not to_notify:
         print("변경·신규 공고 없음.")
@@ -69,7 +82,14 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
 
     if dry_run:
         print("(dry-run) 카카오 발송 생략")
-        save_state({"initialized": True, "job_snapshots": snapshots, "needs_baseline": False})
+        save_state(
+            {
+                "initialized": True,
+                "job_snapshots": snapshots,
+                "notified_fingerprints": notified,
+                "needs_baseline": False,
+            }
+        )
         return 0
 
     for job, reason in reversed(to_notify):
@@ -78,7 +98,14 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
             prefix_title = f"[재게시] {prefix_title}"
         send_kicpa_job_alert(prefix_title, job["link"])
 
-    save_state({"initialized": True, "job_snapshots": snapshots, "needs_baseline": False})
+    save_state(
+        {
+            "initialized": True,
+            "job_snapshots": snapshots,
+            "notified_fingerprints": notified,
+            "needs_baseline": False,
+        }
+    )
     print(f"카카오톡 {len(to_notify)}건 발송 완료.")
     return 0
 
