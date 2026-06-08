@@ -89,8 +89,16 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
         jobs_with_id, snapshots, notified, baseline=False
     )
 
+    new_state = {
+        "initialized": True,
+        "job_snapshots": snapshots,
+        "notified_fingerprints": notified,
+        "needs_baseline": False,
+    }
+
     if not to_notify:
         print("삼정KPMG: 변경·신규 공고 없음.")
+        save_state(new_state)
         return 0
 
     print(f"삼정KPMG 알림 대상 {len(to_notify)}건:")
@@ -100,16 +108,10 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
             f"{job['job_id']} | {job_fingerprint(job)}"
         )
 
+    save_state(new_state)
+
     if dry_run:
         print("(dry-run) 카카오 발송 생략")
-        save_state(
-            {
-                "initialized": True,
-                "job_snapshots": snapshots,
-                "notified_fingerprints": notified,
-                "needs_baseline": False,
-            }
-        )
         return 0
 
     for job, reason in reversed(to_notify):
@@ -118,14 +120,6 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
             title = f"[재게시] {title}"
         send_kpmg_career_alert(title, job["link"])
 
-    save_state(
-        {
-            "initialized": True,
-            "job_snapshots": snapshots,
-            "notified_fingerprints": notified,
-            "needs_baseline": False,
-        }
-    )
     print(f"삼정KPMG 카카오톡 {len(to_notify)}건 발송 완료.")
     return 0
 

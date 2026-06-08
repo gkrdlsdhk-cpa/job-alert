@@ -79,7 +79,6 @@ def run_watch(*, seed_only: bool = False) -> int:
 
     title = status.get("title", "삼일PwC 정기채용 모집 시작")
     link = status.get("link", watch_url)
-    send_pwc_recruitment_alert(title, link)
 
     save_state(
         {
@@ -89,6 +88,7 @@ def run_watch(*, seed_only: bool = False) -> int:
             "fingerprint": fingerprint,
         }
     )
+    send_pwc_recruitment_alert(title, link)
     print("모집 오픈 카카오톡 알림 발송 완료.")
     return 0
 
