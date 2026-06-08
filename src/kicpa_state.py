@@ -110,7 +110,8 @@ def apply_jobs_to_snapshots(
         elif old == LEGACY_MARKER:
             updated[job_id] = fp
         elif old != fp:
-            to_notify.append((job, "수정·재게시"))
+            # 제목·등록일 표기가 사이트마다 조금씩 바뀌면 매 폴링마다 재알림될 수 있어
+            # 스냅샷만 갱신하고 카카오는 보내지 않음 (신규 job_id만 알림)
             updated[job_id] = fp
 
     return to_notify, updated
