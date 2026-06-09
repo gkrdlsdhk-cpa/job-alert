@@ -18,8 +18,10 @@ def state_path() -> Path:
 
 
 def job_fingerprint(job: dict) -> str:
-    """제목만으로 fingerprint — 날짜 표기는 사이트마다 오늘마감·내일마감 등으로 바뀌어 제외."""
-    return str(job.get("title", "")).strip()
+    """제목·등록일이 바뀌면 값이 달라짐."""
+    title = str(job.get("title", "")).strip()
+    date = str(job.get("date", "")).strip()
+    return f"{title}|{date}" if date else title
 
 
 def _migrate_legacy(data: dict) -> dict[str, str]:
@@ -52,28 +54,23 @@ def _already_notified(notified: dict[str, list[str]], job_id: str, fp: str) -> b
 
 
 def _normalize_fp(fp: str) -> str:
-    """이전 title|date 형식 → title만 추출. 마감 임박 marker는 유지."""
-    if "|" not in fp:
-        return fp
-    title, marker = fp.rsplit("|", 1)
-    if marker in {"내일마감", "오늘마감"}:
-        return fp
-    return title
+    return fp
 
 
 def load_notified_fingerprints(
     data: dict,
     snapshots: dict[str, str],
+    *,
+    normalize_func: Callable[[str], str] = _normalize_fp,
 ) -> dict[str, list[str]]:
-    """저장된 알림 이력 로드. 없으면 현재 스냅샷을 이미 알림 보낸 것으로 간주.
-    title|date 형식으로 저장된 이전 fingerprint는 title만 남기도록 정규화."""
+    """저장된 알림 이력 로드. 없으면 현재 스냅샷을 이미 알림 보낸 것으로 간주."""
     raw = data.get("notified_fingerprints")
     if isinstance(raw, dict) and raw:
         notified: dict[str, list[str]] = {}
         for job_id, fps in raw.items():
             if not job_id or not isinstance(fps, list):
                 continue
-            cleaned = [_normalize_fp(str(fp)) for fp in fps if fp]
+            cleaned = [normalize_func(str(fp)) for fp in fps if fp]
             cleaned = [fp for fp in cleaned if fp]
             if cleaned:
                 notified[str(job_id)] = list(dict.fromkeys(cleaned))  # dedupe
@@ -82,8 +79,13 @@ def load_notified_fingerprints(
     notified = {}
     for job_id, fp in snapshots.items():
         if fp and fp != LEGACY_MARKER:
-            _mark_notified(notified, str(job_id), _normalize_fp(str(fp)))
+            _mark_notified(notified, str(job_id), normalize_func(str(fp)))
     return notified
+
+
+def _is_title_only_upgrade(old: str, new: str) -> bool:
+    """최근 title-only 저장값을 title|date로 되돌릴 때 기존 공고 재알림을 막음."""
+    return bool(old and "|" not in old and new.startswith(f"{old}|"))
 
 
 def load_state() -> dict:
@@ -149,6 +151,7 @@ def apply_jobs_to_snapshots(
     *,
     baseline: bool = False,
     fingerprint_func: Callable[[dict], str] = job_fingerprint,
+    migrate_title_only_without_notify: bool = True,
 ) -> tuple[list[tuple[dict, str]], dict[str, str], dict[str, list[str]]]:
     """
     공고 목록과 스냅샷을 비교합니다.
@@ -182,6 +185,9 @@ def apply_jobs_to_snapshots(
             _mark_notified(notified_updated, job_id, fp)
         elif old != fp:
             updated[job_id] = fp
+            if migrate_title_only_without_notify and _is_title_only_upgrade(old, fp):
+                _mark_notified(notified_updated, job_id, fp)
+                continue
             if not _already_notified(notified_updated, job_id, fp):
                 to_notify.append((job, "수정·재게시"))
             _mark_notified(notified_updated, job_id, fp)

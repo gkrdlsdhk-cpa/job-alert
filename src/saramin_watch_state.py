@@ -37,6 +37,16 @@ def job_fingerprint(job: dict) -> str:
     return f"{title}|{marker}" if marker else title
 
 
+def _normalize_saramin_fp(fp: str) -> str:
+    """이전 title|date 저장값은 title만 남기고, 마감 임박 marker는 유지."""
+    if "|" not in fp:
+        return fp
+    title, marker = fp.rsplit("|", 1)
+    if marker in {"내일마감", "오늘마감"}:
+        return fp
+    return title
+
+
 def apply_jobs_to_snapshots(
     jobs: list[dict],
     snapshots: dict[str, str],
@@ -50,6 +60,7 @@ def apply_jobs_to_snapshots(
         notified,
         baseline=baseline,
         fingerprint_func=job_fingerprint,
+        migrate_title_only_without_notify=False,
     )
 
 
@@ -79,7 +90,11 @@ def load_state() -> dict:
     return {
         "initialized": True,
         "job_snapshots": snapshots,
-        "notified_fingerprints": load_notified_fingerprints(data, snapshots),
+        "notified_fingerprints": load_notified_fingerprints(
+            data,
+            snapshots,
+            normalize_func=_normalize_saramin_fp,
+        ),
         "needs_baseline": bool(data.get("needs_baseline", False)),
     }
 
