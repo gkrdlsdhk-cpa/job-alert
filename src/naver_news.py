@@ -44,7 +44,8 @@ def _title_tokens(title: str) -> set[str]:
     normalized = _normalize_title_for_dedupe(title)
     compact = normalized.replace(" ", "")
     tokens = set()
-    for token in TITLE_WORD_RE.findall(normalized):
+    words = TITLE_WORD_RE.findall(normalized)
+    for token in words:
         if token.endswith("에") and len(token) > 3:
             token = token[:-1]
         if token.startswith("한국") and len(token) > 4:
@@ -54,6 +55,10 @@ def _title_tokens(title: str) -> set[str]:
         if len(token) < 2 or token in TITLE_STOPWORDS:
             continue
         tokens.add(token)
+    for left, right in zip(words, words[1:]):
+        combined = f"{left}{right}"
+        if 4 <= len(combined) <= 12:
+            tokens.add(combined)
     if "생산적금융" in compact:
         tokens.add("생산적금융")
     if "활성화" in compact:

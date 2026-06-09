@@ -17,6 +17,7 @@ from src.taxtimes_news import DEFAULT_FEEDS as TAXTIMES_DEFAULT_FEEDS
 from src.taxtimes_news import fetch_today_by_section as fetch_taxtimes_today
 from src.taxwatch_email_sender import send_digest as send_email_digest
 from src.taxwatch_news import fetch_today_articles
+from src.naver_news import _is_similar_title
 
 
 def load_config() -> dict:
@@ -68,13 +69,39 @@ def _build_sections(config: dict) -> dict[str, list[dict]]:
     return sections
 
 
+def _dedupe_sections_by_title(sections: dict[str, list[dict]]) -> dict[str, list[dict]]:
+    """섹션 순서상 먼저 나온 기사를 남기고, 뒤의 유사 제목 기사는 제외."""
+    deduped: dict[str, list[dict]] = {}
+    seen_links: set[str] = set()
+    seen_titles: list[str] = []
+
+    for section_name, articles in sections.items():
+        kept: list[dict] = []
+        for article in articles:
+            link = article.get("link", "")
+            title = article.get("title", "")
+            if link and link in seen_links:
+                continue
+            if title and any(_is_similar_title(title, seen_title) for seen_title in seen_titles):
+                continue
+
+            kept.append(article)
+            if link:
+                seen_links.add(link)
+            if title:
+                seen_titles.append(title)
+        deduped[section_name] = kept
+
+    return deduped
+
+
 def deliver_taxwatch_briefing() -> None:
     config = load_config()
     briefing_cfg = config.get("taxwatch_briefing", {})
     channel = (briefing_cfg.get("channel") or "telegram").strip().lower()
 
     print("1/2 오늘의 tax 브리핑 수집 중...")
-    sections = _build_sections(config)
+    sections = _dedupe_sections_by_title(_build_sections(config))
     total = 0
     for section_name, articles in sections.items():
         print(f"  [{section_name}] {len(articles)}건")
