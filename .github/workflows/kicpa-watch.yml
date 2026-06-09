@@ -81,6 +81,13 @@ jobs:
       - name: Save watch state
         if: always()
         run: |
+          cd state
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin job-alert-state
+          git rebase origin/job-alert-state
+          cd ..
+
           mkdir -p state/data
           for file in \
             data/kicpa_notified.json \
@@ -96,8 +103,6 @@ jobs:
           done
 
           cd state
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           if ls data/*.json >/dev/null 2>&1; then
             git add -f data/*.json
@@ -110,5 +115,16 @@ jobs:
             echo "Watch state unchanged."
           else
             git commit -m "Update realtime watch state"
-            git push origin HEAD:job-alert-state
+            for attempt in 1 2 3 4 5; do
+              if git push origin HEAD:job-alert-state; then
+                echo "Watch state pushed on attempt ${attempt}."
+                exit 0
+              fi
+              echo "Watch state push failed on attempt ${attempt}; syncing and retrying."
+              git fetch origin job-alert-state
+              git rebase origin/job-alert-state
+              sleep $((attempt * 3))
+            done
+            echo "Watch state push failed after retries."
+            exit 1
           fi
