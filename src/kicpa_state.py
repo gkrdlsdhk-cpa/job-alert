@@ -17,10 +17,8 @@ def state_path() -> Path:
 
 
 def job_fingerprint(job: dict) -> str:
-    """제목·등록일이 바뀌면 값이 달라짐."""
-    title = str(job.get("title", "")).strip()
-    date = str(job.get("date", "")).strip()
-    return f"{title}|{date}"
+    """제목만으로 fingerprint — 날짜 표기는 사이트마다 오늘마감·내일마감 등으로 바뀌어 제외."""
+    return str(job.get("title", "")).strip()
 
 
 def _migrate_legacy(data: dict) -> dict[str, str]:
@@ -52,26 +50,33 @@ def _already_notified(notified: dict[str, list[str]], job_id: str, fp: str) -> b
     return fp in notified.get(job_id, [])
 
 
+def _normalize_fp(fp: str) -> str:
+    """이전 title|date 형식 → title만 추출. 이미 title만 있으면 그대로."""
+    return fp.split("|")[0] if "|" in fp else fp
+
+
 def load_notified_fingerprints(
     data: dict,
     snapshots: dict[str, str],
 ) -> dict[str, list[str]]:
-    """저장된 알림 이력 로드. 없으면 현재 스냅샷을 이미 알림 보낸 것으로 간주."""
+    """저장된 알림 이력 로드. 없으면 현재 스냅샷을 이미 알림 보낸 것으로 간주.
+    title|date 형식으로 저장된 이전 fingerprint는 title만 남기도록 정규화."""
     raw = data.get("notified_fingerprints")
     if isinstance(raw, dict) and raw:
         notified: dict[str, list[str]] = {}
         for job_id, fps in raw.items():
             if not job_id or not isinstance(fps, list):
                 continue
-            cleaned = [str(fp) for fp in fps if fp]
+            cleaned = [_normalize_fp(str(fp)) for fp in fps if fp]
+            cleaned = [fp for fp in cleaned if fp]
             if cleaned:
-                notified[str(job_id)] = cleaned
+                notified[str(job_id)] = list(dict.fromkeys(cleaned))  # dedupe
         return notified
 
     notified = {}
     for job_id, fp in snapshots.items():
-        if fp:
-            _mark_notified(notified, str(job_id), str(fp))
+        if fp and fp != LEGACY_MARKER:
+            _mark_notified(notified, str(job_id), _normalize_fp(str(fp)))
     return notified
 
 
