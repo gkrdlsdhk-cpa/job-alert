@@ -8,7 +8,7 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from src.briefing_page import render_jobs_html, render_news_html
+from src.briefing_page import render_news_html
 
 
 def _send_html_email(*, subject: str, html_body: str) -> str:
@@ -43,13 +43,6 @@ def send_news_digest(company_news: dict[str, list[dict]]) -> str:
     today = datetime.now().strftime("%Y-%m-%d")
     subject = f"[회계법인 뉴스] {today}"
     return _send_html_email(subject=subject, html_body=render_news_html(company_news))
-
-
-def send_jobs_digest(saramin_jobs: dict[str, list[dict]]) -> str:
-    """사람인 채용 HTML 메일 발송."""
-    today = datetime.now().strftime("%Y-%m-%d")
-    subject = f"[사람인 채용] {today}"
-    return _send_html_email(subject=subject, html_body=render_jobs_html(saramin_jobs))
 
 
 def send_digest(

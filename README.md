@@ -3,7 +3,6 @@
 회계·Big4 취업 준비생을 위한 **매일 자동 브리핑** 프로젝트입니다.
 
 - **회계법인 뉴스** (23시): 네이버 뉴스 — 삼일·삼정·안진·한영 당일 기사
-- **사람인 채용** (12시): 회계법인, 감사, Big4, CPA 키워드 공고
 - **한국공인회계사회 구인(수습CPA)**: 신규 공고 시 카카오 실시간 (`kicpa_watch.py`)
 - **삼일PwC 정기채용** ([링크](https://pwc.to/2xLHIx4)): 모집 오픈 시 카카오 실시간 (`pwc_watch.py`)
 - **사람인 Big4·삼정KPMG·EY한영·딜로이트 채용 사이트**: 신규 공고 시 카카오 실시간 (`saramin_watch.py`, `kpmg_watch.py`, `ey_watch.py`, `deloitte_watch.py`)
@@ -82,7 +81,7 @@ EMAIL_TO=받을@gmail.com
 
 ## 6. 관심 기업·키워드 수정 (선택)
 
-`config.yaml` 파일에서 기업 이름, 사람인 키워드, 회계사회 **폴링 주기**(`kicpa.poll_minutes`)를 바꿀 수 있습니다.
+`config.yaml` 파일에서 기업 이름, Realtime 사람인 감시 회사, 회계사회 **폴링 주기**(`kicpa.poll_minutes`)를 바꿀 수 있습니다.
 
 ---
 
@@ -92,10 +91,9 @@ EMAIL_TO=받을@gmail.com
 cd ~/job-alert
 source .venv/bin/activate
 python firm_news_briefing.py   # 회계법인 뉴스
-python saramin_briefing.py     # 사람인 채용
 ```
 
-성공하면 Gmail에 `[회계법인 뉴스]` / `[사람인 채용]` 메일이 각각 옵니다.
+성공하면 Gmail에 `[회계법인 뉴스]` 메일이 옵니다.
 
 ---
 
@@ -103,7 +101,6 @@ python saramin_briefing.py     # 사람인 채용
 
 | 브리핑 | 시간 | plist 예시 |
 |--------|------|------------|
-| 사람인 채용 | 12:00 | `com.jobalert.saramin.plist.example` |
 | 회계법인 뉴스 | 23:00 | `com.jobalert.firm-news.plist.example` |
 
 ### 8-1. 로그 폴더 만들기
@@ -112,10 +109,9 @@ python saramin_briefing.py     # 사람인 채용
 mkdir -p ~/job-alert/logs
 ```
 
-### 8-2. 스케줄 파일 복사 (사람인 12시 예시)
+### 8-2. 스케줄 파일 복사
 
 ```bash
-cp ~/job-alert/com.jobalert.saramin.plist.example ~/Library/LaunchAgents/com.jobalert.saramin.plist
 cp ~/job-alert/com.jobalert.firm-news.plist.example ~/Library/LaunchAgents/com.jobalert.firm-news.plist
 ```
 
@@ -124,19 +120,18 @@ cp ~/job-alert/com.jobalert.firm-news.plist.example ~/Library/LaunchAgents/com.j
 ### 8-3. 스케줄 등록
 
 ```bash
-launchctl load ~/Library/LaunchAgents/com.jobalert.saramin.plist
 launchctl load ~/Library/LaunchAgents/com.jobalert.firm-news.plist
 ```
 
-Mac이 켜져 있으면 **12시**(사람인) · **23시**(회계법인 뉴스)에 각각 실행됩니다.
+Mac이 켜져 있으면 **23시**에 회계법인 뉴스가 실행됩니다.
 
 ### 시간 변경
 
-plist에서 `<integer>12</integer>` / `<integer>23</integer>` (시) 등을 수정 후:
+plist에서 `<integer>23</integer>` (시) 등을 수정 후:
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.jobalert.saramin.plist
-launchctl load ~/Library/LaunchAgents/com.jobalert.saramin.plist
+launchctl unload ~/Library/LaunchAgents/com.jobalert.firm-news.plist
+launchctl load ~/Library/LaunchAgents/com.jobalert.firm-news.plist
 ```
 
 ---
@@ -148,13 +143,11 @@ launchctl load ~/Library/LaunchAgents/com.jobalert.saramin.plist
 | `python3: command not found` | 0번 Xcode Command Line Tools 설치 |
 | 뉴스가 비어 있음 | `.env`의 네이버 API 키 확인 |
 | 메일 발송 실패 | Gmail 2단계 인증 + **앱 비밀번호** 사용 |
-| 사람인 공고가 비어 있음 | 사이트 구조 변경 가능 → 메일의 **"사람인에서 더 보기"** 링크 사용 |
-
 ---
 
 ## 9. 카카오톡으로 받기 (나에게 보내기, 선택)
 
-> **기본값은 텔레그램**입니다 (`firm_news_briefing` / `saramin_briefing` → `channel: telegram`).
+> **기본값은 텔레그램**입니다 (`firm_news_briefing` → `channel: telegram`).
 
 **카카오톡 '나와의 채팅'** 으로 브리핑 Gmail 확인 알림을 받을 수 있습니다.
 
@@ -179,8 +172,6 @@ KAKAO_REDIRECT_URI=http://localhost:8080
 ```yaml
 firm_news_briefing:
   channel: kakao
-saramin_briefing:
-  channel: kakao
 ```
 
 ### 9-3. 최초 1회 로그인 (refresh token 발급)
@@ -198,8 +189,6 @@ python kakao_auth.py
 
 ```bash
 python firm_news_briefing.py
-# 또는
-python saramin_briefing.py
 ```
 
 카카오톡 **'나와의 채팅'** 에 Gmail 확인 알림이 옵니다. (전체 내용은 Gmail)
@@ -245,33 +234,17 @@ python pwc_watch.py          # 테스트
 
 ---
 
-## 11. Mac이 꺼져 있어도 매일 12시 자동 실행 (클라우드)
-
-Mac을 끄거나 잠자기 상태여도 **cron-job.org**가 매일 **한국 시간 12:00**에 브리핑을 보냅니다 (`CLOUD_SETUP.md` **8번**).
-
-1. 코드는 이미 GitHub에 올라가 있음: https://github.com/gkrdlsdhk-cpa/job-alert  
-2. **`CLOUD_SETUP.md`** 를 열고 **3번 GitHub Secrets**를 `.env` 값대로 **하나씩** 등록  
-3. **§8** cron-job `job alert briefing 12pm` 등록 후 **TEST RUN** (`204`)  
-4. 클라우드만 쓸 거면 Mac 12시 스케줄 끄기 (`CLOUD_SETUP.md` 5번)
-
-| Mac 스케줄 (8번) | GitHub Actions (10번) |
-|------------------|------------------------|
-| Mac이 **켜져 있어야** 함 | Mac **꺼져 있어도** 됨 |
-| `launchctl` | GitHub Secrets + Actions |
-
----
-
-## 12. 매일 오전 9시 미국 주식 시세 (카카오)
+## 11. 매일 오전 9시 미국 주식 시세 (카카오)
 
 **나스닥 지수·테슬라(TSLA)·엔비디아(NVDA)** 시세를 카카오톡 **나와의 채팅**으로 보냅니다. (네이버 증권, 전일 대비 등락률)
 
-### 12-1. 필요한 설정
+### 11-1. 필요한 설정
 
 - **텔레그램 (권장):** `.env`에 `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` (`CLOUD_SETUP.md` **10번**, 복약 알림과 동일 봇 가능)
 - `config.yaml` → `stock_alert.channel: telegram` (기본값)
 - **카카오:** `channel: kakao` + `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN` (README 9번) + [제품 링크](https://developers.kakao.com) 웹 도메인 `https://m.stock.naver.com`
 
-### 12-2. 테스트
+### 11-2. 테스트
 
 ```bash
 cd ~/job-alert
@@ -289,21 +262,21 @@ python stock_alert.py
 엔비디아(NVDA) $214.75 -4.28%
 ```
 
-### 12-3. Mac에서 매일 9시 (선택)
+### 11-3. Mac에서 매일 9시 (선택)
 
 ```bash
 cp ~/job-alert/com.jobalert.stock.plist.example ~/Library/LaunchAgents/com.jobalert.stock.plist
 launchctl load ~/Library/LaunchAgents/com.jobalert.stock.plist
 ```
 
-### 12-4. Mac 꺼져 있어도 (GitHub Actions)
+### 11-4. Mac 꺼져 있어도 (GitHub Actions)
 
 GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**  
 (매일 **09:00 KST** 자동: `CLOUD_SETUP.md` **7번** cron-job.org 권장, Secret은 텔레그램 2개)
 
 종목 변경은 `config.yaml` → `stock_alert.symbols` 에서 `naver_code`(예: `TSLA.O`)를 수정합니다.
 
-### 12-5. 매일 복약 알림 (텔레그램)
+### 11-5. 매일 복약 알림 (텔레그램)
 
 - **텔레그램** 채팅 안 **복용 완료 ✅** 버튼 → `CLOUD_SETUP.md` **10번**
 

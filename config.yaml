@@ -3,11 +3,6 @@
 firm_news_briefing:
   channel: telegram
 
-# 사람인 채용 (saramin_briefing.py) — 매일 12시 Gmail + 텔레그램
-# channel: telegram (권장) | kakao | email
-saramin_briefing:
-  channel: telegram
-
 # 관심 기업 — 네이버 뉴스 탭 검색 키워드 (회사명 = 키워드 1:1)
 companies:
   - name: 삼일회계법인
@@ -28,15 +23,6 @@ naver:
   sort: date              # 최신순
   today_only: true        # 당일(KST) 기사만
   max_fetch_per_keyword: 50   # 당일 필터 전 조회 건수 (API 최대 100)
-
-# 사람인 채용 검색
-saramin:
-  search_keywords:
-    - 회계법인
-    - 감사
-    - Big4
-    - CPA
-  max_results_per_keyword: 5
 
 # 한국공인회계사회 — 구인(수습CPA) 실시간 카카오 알림 (kicpa_watch.py)
 kicpa:

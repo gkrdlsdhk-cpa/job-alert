@@ -81,23 +81,6 @@ def send_firm_news_briefing_alert(email_to: str, article_count: int) -> int:
     )
 
 
-def send_saramin_briefing_alert(email_to: str, job_count: int) -> int:
-    """사람인 채용 — Gmail 메일 링크 버튼."""
-    today = datetime.now(KST).strftime("%Y-%m-%d")
-    today_short = datetime.now(KST).strftime("%m-%d")
-    mail_url = gmail_search_url(email_to, f"[사람인 채용] {today}")
-    if job_count:
-        text = f"💼 사람인 채용 ({today_short})\n{job_count}건 → {email_to}"
-    else:
-        text = f"💼 사람인 채용 ({today_short})\n공고 없음 → {email_to}"
-    return _send_message(
-        text=text,
-        reply_markup={
-            "inline_keyboard": [[{"text": "브리핑 메일 보기", "url": mail_url}]]
-        },
-    )
-
-
 def send_job_briefing_alert(
     email_to: str, *, news_count: int, job_count: int
 ) -> int:

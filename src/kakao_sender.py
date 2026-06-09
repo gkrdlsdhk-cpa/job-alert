@@ -249,18 +249,6 @@ def send_firm_news_notification(email_to: str) -> None:
     )
 
 
-def send_saramin_notification(email_to: str) -> None:
-    """사람인 채용 Gmail 확인 카카오 알림."""
-    today = datetime.now().strftime("%Y-%m-%d")
-    mail_url = gmail_briefing_url(email_to, mail_subject=f"[사람인 채용] {today}")
-    _send_feed_alert(
-        email_to,
-        mail_url,
-        today,
-        card_title=f"💼 사람인 채용 ({today})",
-    )
-
-
 def send_notification(email_to: str) -> None:
     """레거시: 통합 취업 브리핑 Gmail 확인 카카오 알림."""
     today = datetime.now().strftime("%Y-%m-%d")
