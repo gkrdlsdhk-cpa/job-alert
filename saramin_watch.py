@@ -13,6 +13,7 @@ from src.kakao_sender import send_saramin_job_alert
 from src.saramin_jobs import fetch_all_company_jobs
 from src.saramin_watch_state import (
     apply_jobs_to_snapshots,
+    deadline_marker,
     job_fingerprint,
     load_state,
     save_state,
@@ -117,7 +118,10 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
 
     for job, reason in reversed(to_notify):
         title = job["title"]
-        if reason == "수정·재게시":
+        marker = deadline_marker(job)
+        if marker:
+            title = f"[{marker}] {title}"
+        elif reason == "수정·재게시":
             title = f"[재게시] {title}"
         send_saramin_job_alert(job["company"], title, job["link"])
 

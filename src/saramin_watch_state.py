@@ -6,7 +6,10 @@ import json
 import os
 from pathlib import Path
 
-from src.kicpa_state import apply_jobs_to_snapshots, job_fingerprint, load_notified_fingerprints
+from src.kicpa_state import (
+    apply_jobs_to_snapshots as _apply_jobs_to_snapshots,
+    load_notified_fingerprints,
+)
 
 DEFAULT_STATE_PATH = (
     Path(__file__).resolve().parent.parent / "data" / "saramin_notified.json"
@@ -16,6 +19,38 @@ DEFAULT_STATE_PATH = (
 def state_path() -> Path:
     custom = os.getenv("SARAMIN_STATE_FILE", "").strip()
     return Path(custom) if custom else DEFAULT_STATE_PATH
+
+
+def deadline_marker(job: dict) -> str:
+    date = str(job.get("date", "")).strip()
+    if "내일마감" in date:
+        return "내일마감"
+    if "오늘마감" in date:
+        return "오늘마감"
+    return ""
+
+
+def job_fingerprint(job: dict) -> str:
+    """사람인은 제목 기준으로 중복을 막되, 내일/오늘마감 전환은 각각 1회 알림."""
+    title = str(job.get("title", "")).strip()
+    marker = deadline_marker(job)
+    return f"{title}|{marker}" if marker else title
+
+
+def apply_jobs_to_snapshots(
+    jobs: list[dict],
+    snapshots: dict[str, str],
+    notified: dict[str, list[str]],
+    *,
+    baseline: bool = False,
+) -> tuple[list[tuple[dict, str]], dict[str, str], dict[str, list[str]]]:
+    return _apply_jobs_to_snapshots(
+        jobs,
+        snapshots,
+        notified,
+        baseline=baseline,
+        fingerprint_func=job_fingerprint,
+    )
 
 
 def load_state() -> dict:

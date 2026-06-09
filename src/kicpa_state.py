@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import Callable
 
 DEFAULT_STATE_PATH = Path(__file__).resolve().parent.parent / "data" / "kicpa_notified.json"
 MAX_STORED_JOBS = 400
@@ -51,8 +52,13 @@ def _already_notified(notified: dict[str, list[str]], job_id: str, fp: str) -> b
 
 
 def _normalize_fp(fp: str) -> str:
-    """이전 title|date 형식 → title만 추출. 이미 title만 있으면 그대로."""
-    return fp.split("|")[0] if "|" in fp else fp
+    """이전 title|date 형식 → title만 추출. 마감 임박 marker는 유지."""
+    if "|" not in fp:
+        return fp
+    title, marker = fp.rsplit("|", 1)
+    if marker in {"내일마감", "오늘마감"}:
+        return fp
+    return title
 
 
 def load_notified_fingerprints(
@@ -142,6 +148,7 @@ def apply_jobs_to_snapshots(
     notified: dict[str, list[str]],
     *,
     baseline: bool = False,
+    fingerprint_func: Callable[[dict], str] = job_fingerprint,
 ) -> tuple[list[tuple[dict, str]], dict[str, str], dict[str, list[str]]]:
     """
     공고 목록과 스냅샷을 비교합니다.
@@ -157,7 +164,7 @@ def apply_jobs_to_snapshots(
         job_id = str(job.get("job_id", "")).strip()
         if not job_id:
             continue
-        fp = job_fingerprint(job)
+        fp = fingerprint_func(job)
         old = updated.get(job_id)
 
         if baseline:
