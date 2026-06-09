@@ -4,6 +4,13 @@ on:
   # 10분 주기: cron-job.org 등 외부 스케줄러가 workflow_dispatch 호출 (CLOUD_SETUP.md §6)
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: realtime-job-alerts
+  cancel-in-progress: false
+
 jobs:
   watch:
     runs-on: ubuntu-latest
@@ -13,6 +20,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Checkout watch state
+        uses: actions/checkout@v4
+        with:
+          ref: job-alert-state
+          path: state
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -21,24 +34,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Prepare data directory
-        run: mkdir -p data
-
       - name: Restore watch state
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            data/kicpa_notified.json
-            data/pwc_graduate_state.json
-            data/saramin_notified.json
-            data/kpmg_notified.json
-            data/ey_notified.json
-            data/deloitte_notified.json
-          key: job-alert-watch-state-v2-${{ github.run_id }}
-          restore-keys: |
-            job-alert-watch-state-v2-
-            job-alert-watch-state-v2
-            job-alert-watch-state-v1
+        run: |
+          mkdir -p data
+          if [ -d state/data ]; then
+            cp -R state/data/. data/
+            echo "Restored watch state from job-alert-state branch."
+          else
+            echo "No saved watch state found; current run will create a baseline."
+          fi
 
       - name: Check Kakao Secrets
         env:
@@ -75,14 +79,36 @@ jobs:
         run: python realtime_watch.py
 
       - name: Save watch state
-        uses: actions/cache/save@v4
         if: always()
-        with:
-          path: |
-            data/kicpa_notified.json
-            data/pwc_graduate_state.json
-            data/saramin_notified.json
-            data/kpmg_notified.json
-            data/ey_notified.json
+        run: |
+          mkdir -p state/data
+          for file in \
+            data/kicpa_notified.json \
+            data/pwc_graduate_state.json \
+            data/saramin_notified.json \
+            data/kpmg_notified.json \
+            data/ey_notified.json \
             data/deloitte_notified.json
-          key: job-alert-watch-state-v2-${{ github.run_id }}
+          do
+            if [ -f "$file" ]; then
+              cp "$file" state/data/
+            fi
+          done
+
+          cd state
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if ls data/*.json >/dev/null 2>&1; then
+            git add -f data/*.json
+          else
+            echo "No watch state files to save."
+            exit 0
+          fi
+
+          if git diff --cached --quiet; then
+            echo "Watch state unchanged."
+          else
+            git commit -m "Update realtime watch state"
+            git push origin HEAD:job-alert-state
+          fi
