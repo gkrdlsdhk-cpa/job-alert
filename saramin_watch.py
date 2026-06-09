@@ -18,6 +18,7 @@ from src.saramin_watch_state import (
     load_state,
     save_state,
 )
+from src.realtime_job_filters import merge_excluded_title_keywords
 
 
 def load_config() -> dict:
@@ -54,7 +55,10 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
     watch_cfg = config.get("saramin_watch", {})
     companies = watch_cfg.get("companies") or []
     max_fetch = int(watch_cfg.get("max_fetch_per_company", 50))
-    excludes = list(watch_cfg.get("exclude_title_contains") or [])
+    excludes = merge_excluded_title_keywords(
+        config,
+        list(watch_cfg.get("exclude_title_contains") or []),
+    )
 
     if not companies:
         print("saramin_watch.companies 가 비어 있습니다.")

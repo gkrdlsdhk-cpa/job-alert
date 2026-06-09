@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from src.kakao_sender import send_kicpa_job_alert
 from src.kicpa_jobs import fetch_trainee_cpa_jobs
 from src.kicpa_state import apply_jobs_to_snapshots, job_fingerprint, load_state, save_state
+from src.realtime_job_filters import filter_jobs_by_excluded_titles, global_excluded_title_keywords
 
 
 def load_config() -> dict:
@@ -51,6 +52,12 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
     print(f"회계사회 구인(수습CPA) 확인 중 (최근 {list_size}건)...")
     jobs = fetch_trainee_cpa_jobs(list_size)
     jobs_with_id = [j for j in jobs if j.get("job_id")]
+    jobs_with_id, skipped_jobs = filter_jobs_by_excluded_titles(
+        jobs_with_id,
+        global_excluded_title_keywords(config),
+    )
+    for job in skipped_jobs:
+        print(f"  제외(제목 필터): {job['title'][:55]} (job_id={job['job_id']})")
 
     state = load_state()
     snapshots = state.get("job_snapshots", {})

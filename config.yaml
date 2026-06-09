@@ -43,6 +43,12 @@ kicpa:
   watch_list_size: 30   # 몇 분마다 확인할 때, 최근 N건 스캔
   poll_minutes: 10      # GitHub Actions / Mac 스케줄 주기 (분)
 
+# Realtime Job Alerts 공통 제외어 — 제목에 포함되면 채용공고 알림 제외
+realtime_job_alerts:
+  exclude_title_contains:
+    - 인사
+    - 총무
+
 # 삼일PwC 정기채용 — 모집 오픈 시 카카오 알림 (pwc_watch.py)
 pwc:
   watch_url: https://pwc.to/2xLHIx4
