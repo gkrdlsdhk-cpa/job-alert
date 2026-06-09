@@ -1,0 +1,82 @@
+"""경희대 경영대학 공지 키워드 알림 상태."""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+from src.kicpa_state import apply_jobs_to_snapshots, job_fingerprint, load_notified_fingerprints
+
+DEFAULT_STATE_PATH = (
+    Path(__file__).resolve().parent.parent / "data" / "khubiz_notice_state.json"
+)
+
+
+def state_path() -> Path:
+    custom = os.getenv("KHUBIZ_NOTICE_STATE_FILE", "").strip()
+    return Path(custom) if custom else DEFAULT_STATE_PATH
+
+
+def load_state() -> dict:
+    path = state_path()
+    if not path.is_file():
+        return {
+            "initialized": True,
+            "job_snapshots": {},
+            "notified_fingerprints": {},
+            "needs_baseline": True,
+        }
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {
+            "initialized": True,
+            "job_snapshots": {},
+            "notified_fingerprints": {},
+            "needs_baseline": True,
+        }
+
+    snapshots = data.get("job_snapshots", {})
+    if not isinstance(snapshots, dict):
+        snapshots = {}
+    snapshots = {str(k): str(v) for k, v in snapshots.items() if k and v}
+    return {
+        "initialized": True,
+        "job_snapshots": snapshots,
+        "notified_fingerprints": load_notified_fingerprints(data, snapshots),
+        "needs_baseline": bool(data.get("needs_baseline", False)),
+    }
+
+
+def save_state(state: dict) -> None:
+    path = state_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    snapshots = state.get("job_snapshots", {})
+    if not isinstance(snapshots, dict):
+        snapshots = {}
+    snapshots = {str(k): str(v) for k, v in snapshots.items() if k and v}
+
+    notified = state.get("notified_fingerprints", {})
+    if not isinstance(notified, dict):
+        notified = {}
+    trimmed_notified = {
+        job_id: notified[job_id]
+        for job_id in snapshots
+        if job_id in notified and notified[job_id]
+    }
+
+    payload = {
+        "initialized": True,
+        "job_snapshots": snapshots,
+        "notified_fingerprints": trimmed_notified,
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+__all__ = [
+    "apply_jobs_to_snapshots",
+    "job_fingerprint",
+    "load_state",
+    "save_state",
+]

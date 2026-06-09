@@ -69,6 +69,7 @@ jobs:
           KPMG_STATE_FILE: data/kpmg_notified.json
           EY_STATE_FILE: data/ey_notified.json
           DELOITTE_STATE_FILE: data/deloitte_notified.json
+          KHUBIZ_NOTICE_STATE_FILE: data/khubiz_notice_state.json
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
@@ -95,7 +96,8 @@ jobs:
             data/saramin_notified.json \
             data/kpmg_notified.json \
             data/ey_notified.json \
-            data/deloitte_notified.json
+            data/deloitte_notified.json \
+            data/khubiz_notice_state.json
           do
             if [ -f "$file" ]; then
               cp "$file" state/data/

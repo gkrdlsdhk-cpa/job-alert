@@ -129,6 +129,11 @@ def send_pwc_recruitment_alert(title: str, link: str) -> None:
     send_link_alert("[삼일PwC 정기채용]", title, link, button_title="채용 보기")
 
 
+def send_khubiz_notice_alert(title: str, link: str) -> None:
+    """경희대 경영대학 공지사항 — 채용 키워드 공지."""
+    send_link_alert("[경희대 경영대학 공지]", title, link, button_title="공지 보기")
+
+
 def _github_actions_run_url() -> str:
     server = os.getenv("GITHUB_SERVER_URL", "").strip().rstrip("/")
     repository = os.getenv("GITHUB_REPOSITORY", "").strip()
@@ -147,6 +152,7 @@ _WATCH_FRIENDLY_NAMES = {
     "삼정KPMG": "삼정KPMG",
     "EY한영": "EY한영",
     "딜로이트": "딜로이트",
+    "경희대 경영대학": "경희대 경영대학",
 }
 
 

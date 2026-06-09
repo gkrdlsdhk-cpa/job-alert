@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 import deloitte_watch
 import ey_watch
+import khubiz_notice_watch
 import kicpa_watch
 import kpmg_watch
 import pwc_watch
@@ -37,6 +38,7 @@ WATCH_STEPS: list[WatchStep] = [
     WatchStep("삼정KPMG", kpmg_watch.run_watch),
     WatchStep("EY한영", ey_watch.run_watch),
     WatchStep("딜로이트", deloitte_watch.run_watch),
+    WatchStep("경희대 경영대학", khubiz_notice_watch.run_watch),
 ]
 
 
