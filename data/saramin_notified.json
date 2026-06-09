@@ -22,7 +22,8 @@
     "54003470": "컨설팅부문 Government & Public Sector 컨설팅 인턴",
     "54108710": "Talent 인사실 보상팀(Total Reward) 인턴",
     "54117448": "[삼일회계법인] Risk Assurance 본부 SPA팀 IT감사 IT개발/운영",
-    "54117771": "[삼일회계법인] Risk Assurance팀 IT감사 및 컨설팅 인턴 채용"
+    "54117771": "[삼일회계법인] Risk Assurance팀 IT감사 및 컨설팅 인턴 채용",
+    "54118194": "전략·재무자문부문 EY Parthenon AI 전담 인력 모집"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -90,6 +91,9 @@
     ],
     "54117771": [
       "[삼일회계법인] Risk Assurance팀 IT감사 및 컨설팅 인턴 채용"
+    ],
+    "54118194": [
+      "전략·재무자문부문 EY Parthenon AI 전담 인력 모집"
     ]
   }
 }
