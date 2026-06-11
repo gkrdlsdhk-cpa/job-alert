@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EY한영(한영회계법인) 채용 사이트 — 공채 실시간 카카오 알림 (폴링)."""
+"""EY한영(한영회계법인) 채용 사이트 — 수시 실시간 카카오 알림 (폴링)."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
     watch_cfg = config.get("ey_watch", {})
     home_url = watch_cfg.get("home_url", DEFAULT_HOME_URL)
     api_prefix = watch_cfg.get("api_prefix") or urlparse(home_url).netloc
-    tag_name = str(watch_cfg.get("classification_tag_name", "공채"))
+    tag_name = str(watch_cfg.get("classification_tag_name", "수시"))
     max_fetch = int(watch_cfg.get("max_results", 50))
 
     print(f"EY한영 채용 공고 확인 중 ({tag_name} 탭, {home_url})...")

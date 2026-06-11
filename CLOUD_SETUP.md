@@ -105,13 +105,13 @@ GitHub → **Actions** → **Realtime Job Alerts** → **Run workflow**
 | 삼일PwC 정기채용 | 모집 오픈(지원 링크·모집 중 문구 등장) | `[삼일PwC 정기채용]` + 채용 보기 |
 | 사람인 Big4 (삼일·삼정KPMG·안진·한영) | **회사명 일치** 신규 공고 (`경력` 제목 제외) | `[사람인 {회사명}]` + 공고 보기 |
 | 삼정KPMG 채용 사이트 | **신입** 탭 신규·재게시 공고 | `[삼정KPMG 신입]` + 채용 보기 |
-| EY한영(한영회계법인) 채용 사이트 | **공채** 탭 신규·재게시 공고 | `[EY한영 공채]` + 공고 보기 |
+| EY한영(한영회계법인) 채용 사이트 | **수시** 탭 신규·재게시 공고 | `[EY한영 수시]` + 공고 보기 |
 | 딜로이트(안진회계법인) 채용 사이트 | **신입** + **Tax & Legal** 검색 결과 | `[딜로이트 Tax&Legal]` + 공고 보기 |
 
 - **첫 실행(또는 캐시 없음)**: 그때 목록에 있던 공고만 등록 (알림 없음). **그 직후 올라온 글부터** 알림
 - 사람인: `config.yaml` → `saramin_watch.companies` (검색어 = 사람인 **회사명** 정확 일치)
 - 삼정KPMG: `config.yaml` → `kpmg_watch` (`receive_div_cd: N` = 신입 탭)
-- EY한영: `config.yaml` → `ey_watch` (`classification_tag_name: 공채`)
+- EY한영: `config.yaml` → `ey_watch` (`classification_tag_name: 수시`)
 - 딜로이트: `config.yaml` → `deloitte_watch` (`exp_type: "1,3"`, `service: AB`)
 - 놓친 공고가 있으면 Actions 로그에 `기준선 등록` / `신규 N건` 확인
 - **이후 ~10분마다** 자동 확인 → **§6 외부 스케줄러** 권장 (GitHub 내장 10분 cron은 자주 스킵됨)

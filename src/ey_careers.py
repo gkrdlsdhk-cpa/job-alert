@@ -1,4 +1,4 @@
-"""EY한영(한영회계법인) 채용 사이트 — 공채 탭 공고 목록."""
+"""EY한영(한영회계법인) 채용 사이트 — 분류별 공고 목록."""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ def fetch_classification_tag_sn(
     home_url: str,
     tag_name: str,
 ) -> int | None:
-    """설정 API에서 분류 태그(공채 등) 번호를 조회합니다."""
+    """설정 API에서 분류 태그(수시 등) 번호를 조회합니다."""
     try:
         response = requests.post(
             f"{API_BASE}/position/v2/jobflex/setting",
@@ -74,10 +74,10 @@ def fetch_open_recruitment_jobs(
     home_url: str = DEFAULT_HOME_URL,
     *,
     api_prefix: str | None = None,
-    classification_tag_name: str = "공채",
+    classification_tag_name: str = "수시",
     max_results: int = 50,
 ) -> list[dict]:
-    """공채 탭 공고를 조회합니다. 실패 시 빈 목록."""
+    """지정한 분류의 공고를 조회합니다. 실패 시 빈 목록."""
     prefix = api_prefix or urlparse(home_url).netloc
     tag_sn = fetch_classification_tag_sn(
         prefix,

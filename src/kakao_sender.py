@@ -115,8 +115,8 @@ def send_kpmg_career_alert(title: str, link: str) -> None:
 
 
 def send_ey_career_alert(title: str, link: str) -> None:
-    """EY한영(한영회계법인) 채용 사이트 공채 — 제목 + 링크."""
-    send_link_alert("[EY한영 공채]", title, link, button_title="공고 보기")
+    """EY한영(한영회계법인) 채용 사이트 수시 — 제목 + 링크."""
+    send_link_alert("[EY한영 수시]", title, link, button_title="공고 보기")
 
 
 def send_deloitte_career_alert(title: str, link: str) -> None:
