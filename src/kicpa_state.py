@@ -113,6 +113,7 @@ def load_state() -> dict:
         "job_snapshots": snapshots,
         "notified_fingerprints": load_notified_fingerprints(data, snapshots),
         "needs_baseline": bool(data.get("needs_baseline", False)),
+        "board_baselines": data.get("board_baselines", {}),
     }
 
 
@@ -140,6 +141,7 @@ def save_state(state: dict) -> None:
         "initialized": True,
         "job_snapshots": snapshots,
         "notified_fingerprints": trimmed_notified,
+        "board_baselines": state.get("board_baselines", {}),
     }
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 

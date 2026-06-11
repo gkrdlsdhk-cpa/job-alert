@@ -24,7 +24,7 @@ naver:
   today_only: true        # 당일(KST) 기사만
   max_fetch_per_keyword: 50   # 당일 필터 전 조회 건수 (API 최대 100)
 
-# 한국공인회계사회 — 구인(수습CPA) 실시간 카카오 알림 (kicpa_watch.py)
+# 한국공인회계사회 — 구인(CPA/수습CPA) 실시간 카카오 알림 (kicpa_watch.py)
 kicpa:
   watch_list_size: 30   # 몇 분마다 확인할 때, 최근 N건 스캔
   poll_minutes: 10      # GitHub Actions / Mac 스케줄 주기 (분)

@@ -99,9 +99,9 @@ def send_link_alert(
     print(f"카카오톡 알림 → {short_title}")
 
 
-def send_kicpa_job_alert(title: str, link: str) -> None:
+def send_kicpa_job_alert(title: str, link: str, *, label: str = "수습CPA") -> None:
     """회계사회 신규 공고 — 제목 + 링크만 카카오톡으로 직접 전송."""
-    send_link_alert("[회계사회 수습CPA 신규]", title, link, button_title="공고 보기")
+    send_link_alert(f"[회계사회 {label} 신규]", title, link, button_title="공고 보기")
 
 
 def send_saramin_job_alert(company: str, title: str, link: str) -> None:

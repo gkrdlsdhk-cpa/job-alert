@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""회계사회 구인(수습CPA) 신규·수정 공고 → 카카오톡 실시간 알림 (폴링)."""
+"""회계사회 구인(CPA/수습CPA) 신규·수정 공고 → 카카오톡 실시간 알림 (폴링)."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import yaml
 from dotenv import load_dotenv
 
 from src.kakao_sender import send_kicpa_job_alert
-from src.kicpa_jobs import fetch_trainee_cpa_jobs
+from src.kicpa_jobs import fetch_cpa_jobs, fetch_trainee_cpa_jobs
 from src.kicpa_state import apply_jobs_to_snapshots, job_fingerprint, load_state, save_state
 from src.realtime_job_filters import filter_jobs_by_excluded_titles, global_excluded_title_keywords
 
@@ -29,12 +29,18 @@ def _baseline_current_jobs(jobs_with_id: list[dict], *, reason: str) -> int:
         state.get("notified_fingerprints", {}),
         baseline=True,
     )
+    board_baselines = dict(state.get("board_baselines", {}))
+    for job in jobs_with_id:
+        board = str(job.get("board", "")).strip()
+        if board:
+            board_baselines[board] = True
     save_state(
         {
             "initialized": True,
             "job_snapshots": snapshots,
             "notified_fingerprints": notified,
             "needs_baseline": False,
+            "board_baselines": board_baselines,
         }
     )
     print(
@@ -49,8 +55,12 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
     kicpa_cfg = config.get("kicpa", {})
     list_size = int(kicpa_cfg.get("watch_list_size", 30))
 
-    print(f"회계사회 구인(수습CPA) 확인 중 (최근 {list_size}건)...")
-    jobs = fetch_trainee_cpa_jobs(list_size)
+    print(f"회계사회 구인(CPA/수습CPA) 확인 중 (최근 {list_size}건씩)...")
+    trainee_jobs = fetch_trainee_cpa_jobs(list_size)
+    cpa_jobs = fetch_cpa_jobs(list_size)
+    print(f"  구인(수습CPA): {len(trainee_jobs)}건")
+    print(f"  구인(CPA): {len(cpa_jobs)}건")
+    jobs = trainee_jobs + cpa_jobs
     jobs_with_id = [j for j in jobs if j.get("job_id")]
     jobs_with_id, skipped_jobs = filter_jobs_by_excluded_titles(
         jobs_with_id,
@@ -62,14 +72,33 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
     state = load_state()
     snapshots = state.get("job_snapshots", {})
     notified = state.get("notified_fingerprints", {})
+    board_baselines = state.get("board_baselines", {})
 
     if seed_only:
-        return _baseline_current_jobs(jobs_with_id, reason="--seed")
+        result = _baseline_current_jobs(jobs_with_id, reason="--seed")
+        state = load_state()
+        board_baselines = state.get("board_baselines", {})
+        board_baselines["구인(CPA)"] = True
+        board_baselines["구인(수습CPA)"] = True
+        state["board_baselines"] = board_baselines
+        save_state(state)
+        return result
 
     if state.get("needs_baseline"):
         return _baseline_current_jobs(
             jobs_with_id,
             reason="상태 파일 없음(캐시 미복구 — 이번 목록만 기준선)",
+        )
+
+    cpa_board_jobs = [job for job in jobs_with_id if job.get("board") == "구인(CPA)"]
+    if cpa_board_jobs and not board_baselines.get("구인(CPA)"):
+        _, snapshots, notified = apply_jobs_to_snapshots(
+            cpa_board_jobs, snapshots, notified, baseline=True
+        )
+        board_baselines["구인(CPA)"] = True
+        print(
+            f"회계사회 구인(CPA) 기준선 등록 — 현재 {len(cpa_board_jobs)}건 저장. "
+            "이후 변경·신규만 카카오 알림."
         )
 
     to_notify, snapshots, notified = apply_jobs_to_snapshots(
@@ -81,6 +110,7 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
         "job_snapshots": snapshots,
         "notified_fingerprints": notified,
         "needs_baseline": False,
+        "board_baselines": board_baselines,
     }
 
     if not to_notify:
@@ -91,7 +121,7 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
     print(f"알림 대상 {len(to_notify)}건:")
     for job, reason in to_notify:
         print(
-            f"  - [{reason}] {job['company']} | {job['title'][:50]} | "
+            f"  - [{reason}] {job.get('board', '회계사회')} | {job['company']} | {job['title'][:50]} | "
             f"{job['job_id']} | {job_fingerprint(job)}"
         )
 
@@ -102,10 +132,11 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
         return 0
 
     for job, reason in reversed(to_notify):
+        label = job.get("alert_label", "수습CPA")
         prefix_title = job["title"]
         if reason == "수정·재게시":
             prefix_title = f"[재게시] {prefix_title}"
-        send_kicpa_job_alert(prefix_title, job["link"])
+        send_kicpa_job_alert(prefix_title, job["link"], label=label)
 
     print(f"카카오톡 {len(to_notify)}건 발송 완료.")
     return 0
