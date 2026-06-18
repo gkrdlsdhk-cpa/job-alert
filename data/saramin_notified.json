@@ -40,7 +40,8 @@
     "54203932": "[삼일회계법인] Public Service 팀 프로젝트 (에너지) 인턴 채용",
     "54203934": "[삼정KPMG] 정보보안팀 정보보안 담당자 채용",
     "54204041": "[삼정KPMG] 정보보안팀 개인정보보호 담당자 채용",
-    "54204959": "[딜로이트 컨설팅] Operation DT/Operation 전략 컨설턴트"
+    "54204959": "[딜로이트 컨설팅] Operation DT/Operation 전략 컨설턴트",
+    "54219511": "[삼정KPMG] SG본부 ESG&Strategy팀 인턴 채용"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -174,6 +175,9 @@
     ],
     "54204959": [
       "[딜로이트 컨설팅] Operation DT/Operation 전략 컨설턴트"
+    ],
+    "54219511": [
+      "[삼정KPMG] SG본부 ESG&Strategy팀 인턴 채용"
     ]
   }
 }
