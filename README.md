@@ -282,13 +282,4 @@ GitHub → **Actions** → **Morning Stock Alert** → **Run workflow**
 
 ---
 
-## 다음 단계 (나중에)
 
-- [ ] 구글 뉴스 API 추가
-- [ ] 링커리어 채용 추가
-- [x] 한국공인회계사회 구인(CPA/수습CPA) — 실시간 카카오 알림
-- [x] 카카오톡 "나에게 보내기" 연동
-- [x] 클라우드(GitHub Actions)로 24시간 스케줄 — 설정은 `CLOUD_SETUP.md`
-- [x] 매일 9시 테슬라·엔비디아 주가 알림 (텔레그램)
-
-궁금한 점은 Cursor 채팅에서 **"job-alert README 3번 도와줘"** 처럼 단계 번호와 함께 물어보세요.
