@@ -57,7 +57,8 @@
     "54313987": "[딜로이트 안진] Digital Assurance그룹 공인회계사(수습회계사)",
     "54321782": "컨설팅부문 Digital 컨설팅 단기 인턴",
     "54326223": "[딜로이트안진회계법인] 경영자문부문 IT 전략/기획 컨설턴트",
-    "54334398": "[딜로이트 안진] 경영자문부문 Valuation 정규직(Consultant)"
+    "54334398": "[딜로이트 안진] 경영자문부문 Valuation 정규직(Consultant)",
+    "54339133": "EY Parthenon VCS 팀(Value Creation Strategy) 컨설턴트"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -260,6 +261,9 @@
     ],
     "54334398": [
       "[딜로이트 안진] 경영자문부문 Valuation 정규직(Consultant)"
+    ],
+    "54339133": [
+      "EY Parthenon VCS 팀(Value Creation Strategy) 컨설턴트"
     ]
   }
 }
