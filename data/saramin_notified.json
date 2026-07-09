@@ -70,7 +70,8 @@
     "54086905": "경영자문부문 기업조사 컨설턴트 계약직(정규직 전환형)",
     "54410284": "[삼일회계법인] Public Service팀 컨설팅 인턴 채용",
     "54289466": "[딜로이트 컨설팅] Monitor Deloitte M&A Professional",
-    "54416616": "컨설팅부문 Technology Transformation팀 인턴"
+    "54416616": "컨설팅부문 Technology Transformation팀 인턴",
+    "54419703": "[딜로이트 안진] 인재부 Talent-Acquisition(채용팀) 계약직"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -316,6 +317,9 @@
     ],
     "54416616": [
       "컨설팅부문 Technology Transformation팀 인턴"
+    ],
+    "54419703": [
+      "[딜로이트 안진] 인재부 Talent-Acquisition(채용팀) 계약직"
     ]
   }
 }
