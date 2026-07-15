@@ -80,7 +80,8 @@
     "54448780": "[EY한영] 디지털 감사 계량 분석가 인턴 (전환형)",
     "54459111": "컨설팅부문 Salesforce CRM / B2B Sales PI 컨설턴트",
     "54470379": "[삼일회계법인] 조직문화 & 변화관리 지원 인턴 채용",
-    "54474585": "[삼일회계법인] Domestic Tax Services 5 변호사 채용"
+    "54474585": "[삼일회계법인] Domestic Tax Services 5 변호사 채용",
+    "54476737": "금융컨설팅부문 Process & Controls 팀 컨설턴트 (금융AX /PI)"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -368,6 +369,9 @@
     ],
     "54474585": [
       "[삼일회계법인] Domestic Tax Services 5 변호사 채용"
+    ],
+    "54476737": [
+      "금융컨설팅부문 Process & Controls 팀 컨설턴트 (금융AX /PI)"
     ]
   }
 }
