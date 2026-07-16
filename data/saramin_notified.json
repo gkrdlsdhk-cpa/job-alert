@@ -82,7 +82,8 @@
     "54470379": "[삼일회계법인] 조직문화 & 변화관리 지원 인턴 채용",
     "54474585": "[삼일회계법인] Domestic Tax Services 5 변호사 채용",
     "54476737": "금융컨설팅부문 Process & Controls 팀 컨설턴트 (금융AX /PI)",
-    "54485091": "[삼일회계법인] General Affair 안내데스크(Reception) 채용"
+    "54485091": "[삼일회계법인] General Affair 안내데스크(Reception) 채용",
+    "54324957": "경영자문부문 Cyber & Resilience 정보보호 컨설턴트"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -379,6 +380,9 @@
     ],
     "54485091": [
       "[삼일회계법인] General Affair 안내데스크(Reception) 채용"
+    ],
+    "54324957": [
+      "경영자문부문 Cyber & Resilience 정보보호 컨설턴트"
     ]
   }
 }
