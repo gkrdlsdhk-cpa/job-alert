@@ -86,7 +86,8 @@
     "54324957": "경영자문부문 Cyber & Resilience 정보보호 컨설턴트",
     "54487219": "[삼일회계법인] 조직문화 데이터 & 소통 플랫폼 지원 인턴 채용",
     "54417307": "회계감사부문 ASSURANCE DELIVERY CENTER 그룹 계약직",
-    "54417396": "세무자문부문 GES Group - Immigration Services 인턴"
+    "54417396": "세무자문부문 GES Group - Immigration Services 인턴",
+    "54476254": "경영자문부문 기업조사 컨설턴트 계약직(정규직 전환형)"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -395,6 +396,9 @@
     ],
     "54417396": [
       "세무자문부문 GES Group - Immigration Services 인턴"
+    ],
+    "54476254": [
+      "경영자문부문 기업조사 컨설턴트 계약직(정규직 전환형)"
     ]
   }
 }
