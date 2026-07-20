@@ -84,7 +84,9 @@
     "54476737": "금융컨설팅부문 Process & Controls 팀 컨설턴트 (금융AX /PI)",
     "54485091": "[삼일회계법인] General Affair 안내데스크(Reception) 채용",
     "54324957": "경영자문부문 Cyber & Resilience 정보보호 컨설턴트",
-    "54487219": "[삼일회계법인] 조직문화 데이터 & 소통 플랫폼 지원 인턴 채용"
+    "54487219": "[삼일회계법인] 조직문화 데이터 & 소통 플랫폼 지원 인턴 채용",
+    "54417307": "회계감사부문 ASSURANCE DELIVERY CENTER 그룹 계약직",
+    "54417396": "세무자문부문 GES Group - Immigration Services 인턴"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -387,6 +389,12 @@
     ],
     "54487219": [
       "[삼일회계법인] 조직문화 데이터 & 소통 플랫폼 지원 인턴 채용"
+    ],
+    "54417307": [
+      "회계감사부문 ASSURANCE DELIVERY CENTER 그룹 계약직"
+    ],
+    "54417396": [
+      "세무자문부문 GES Group - Immigration Services 인턴"
     ]
   }
 }
