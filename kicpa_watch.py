@@ -137,7 +137,7 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
         if reason == "수정·재게시":
             prefix_title = f"[재게시] {prefix_title}"
         send_kicpa_job_alert(prefix_title, job["link"], label=label)
-save_state(new_state)
+    save_state(new_state)
     print(f"카카오톡 {len(to_notify)}건 발송 완료.")
     return 0
 
