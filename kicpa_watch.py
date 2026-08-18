@@ -125,10 +125,10 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
             f"{job['job_id']} | {job_fingerprint(job)}"
         )
 
-    save_state(new_state)
+    
 
     if dry_run:
-        print("(dry-run) 카카오 발송 생략")
+        print("(dry-run) 카카오 발송 생략 — 상태도 저장하지 않음")
         return 0
 
     for job, reason in reversed(to_notify):
@@ -137,7 +137,7 @@ def run_watch(*, seed_only: bool = False, dry_run: bool = False) -> int:
         if reason == "수정·재게시":
             prefix_title = f"[재게시] {prefix_title}"
         send_kicpa_job_alert(prefix_title, job["link"], label=label)
-
+save_state(new_state)
     print(f"카카오톡 {len(to_notify)}건 발송 완료.")
     return 0
 
