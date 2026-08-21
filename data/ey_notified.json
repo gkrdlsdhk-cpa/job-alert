@@ -121,7 +121,8 @@
     "125602": "컨설팅부문 Data Architect & Engineering 인턴|2026-08-20 ~ 2026-08-30",
     "125615": "컨설팅부문 Digital & Emerging Technologies 팀 인턴|2026-08-20 ~ 2026-08-27",
     "125660": "금융감사본부 Digital Audit, AI 및 리스크 계량 분석가 [경력]|2026-08-20 ~ 2026-09-06",
-    "125807": "EY Parthenon VCS 팀(Value Creation Strategy, 운영혁신전략) 컨설턴트|2026-08-21 ~ 2026-09-06"
+    "125807": "EY Parthenon VCS 팀(Value Creation Strategy, 운영혁신전략) 컨설턴트|2026-08-21 ~ 2026-09-06",
+    "125812": "EY Parthenon VCS팀(Value Creation Strategy, 운영혁신전략) 채용 전환형 인턴|2026-08-21 ~ 2026-09-06"
   },
   "notified_fingerprints": {
     "117303": [
@@ -529,6 +530,9 @@
     ],
     "125807": [
       "EY Parthenon VCS 팀(Value Creation Strategy, 운영혁신전략) 컨설턴트|2026-08-21 ~ 2026-09-06"
+    ],
+    "125812": [
+      "EY Parthenon VCS팀(Value Creation Strategy, 운영혁신전략) 채용 전환형 인턴|2026-08-21 ~ 2026-09-06"
     ]
   }
 }
