@@ -133,9 +133,11 @@
     "54773197": "[딜로이트 컨설팅] Operation DT/Operation 전략 컨설턴트",
     "54773904": "[삼정KPMG] 데이터 및 데이터 플랫폼 관리 엔지니어 모집",
     "54782182": "[딜로이트 컨설팅] Monitor Deloitte M&A Professional",
-    "54787812": "금융컨설팅부문 AI · Technology · Security(AITS) 인턴",
+    "54787812": "금융컨설팅부문 AI · Technology · Security(AITS) 인턴|오늘마감",
     "54797408": "[삼일회계법인] Risk Assurance 본부 SPA팀 글로벌 IT감사 채용",
-    "54813663": "[삼일회계법인] Risk Assurance 본부 SPA팀 IT감사/컨설팅 채용"
+    "54813663": "[삼일회계법인] Risk Assurance 본부 SPA팀 IT감사/컨설팅 채용",
+    "54822156": "EY Parthenon VCS 팀(Value Creation Strategy) 컨설턴트",
+    "54822150": "EY Parthenon VCS팀(Value Creation Strategy) 전환형 인턴"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -644,13 +646,20 @@
       "[딜로이트 컨설팅] Monitor Deloitte M&A Professional"
     ],
     "54787812": [
-      "금융컨설팅부문 AI · Technology · Security(AITS) 인턴"
+      "금융컨설팅부문 AI · Technology · Security(AITS) 인턴",
+      "금융컨설팅부문 AI · Technology · Security(AITS) 인턴|오늘마감"
     ],
     "54797408": [
       "[삼일회계법인] Risk Assurance 본부 SPA팀 글로벌 IT감사 채용"
     ],
     "54813663": [
       "[삼일회계법인] Risk Assurance 본부 SPA팀 IT감사/컨설팅 채용"
+    ],
+    "54822156": [
+      "EY Parthenon VCS 팀(Value Creation Strategy) 컨설턴트"
+    ],
+    "54822150": [
+      "EY Parthenon VCS팀(Value Creation Strategy) 전환형 인턴"
     ]
   }
 }
