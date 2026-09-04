@@ -149,7 +149,8 @@
     "54911632": "컨설팅부문 데이터 분석 인턴",
     "54914703": "전략·재무자문부문 Deal3 (M&A) 정규전환형 인턴",
     "54939567": "감사부문 RPM(Resource Planning Management)팀 운영관리 계약직",
-    "54940626": "컨설팅부문 SAP SuccessFactors 컨설턴트 인턴"
+    "54940626": "컨설팅부문 SAP SuccessFactors 컨설턴트 인턴",
+    "54941735": "컨설팅부문 Digital 컨설팅(AX) 인턴"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -712,6 +713,9 @@
     ],
     "54940626": [
       "컨설팅부문 SAP SuccessFactors 컨설턴트 인턴"
+    ],
+    "54941735": [
+      "컨설팅부문 Digital 컨설팅(AX) 인턴"
     ]
   }
 }
