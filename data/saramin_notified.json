@@ -166,7 +166,8 @@
     "54999147": "[삼정KPMG] ITS 회계감사 시스템 운영지원 담당자 채용",
     "55010459": "[딜로이트안진회계법인] 회계감사부문 품질관리실 GAAS팀 admin",
     "55029031": "[딜로이트 컨설팅] Operation DT/Operation 전략 컨설턴트",
-    "55030010": "[삼일회계법인] Sustainability team RA(Research Assistant)"
+    "55030010": "[삼일회계법인] Sustainability team RA(Research Assistant)",
+    "55043386": "[삼정KPMG] HRD 교육담당자 채용"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -796,6 +797,9 @@
     ],
     "55030010": [
       "[삼일회계법인] Sustainability team RA(Research Assistant)"
+    ],
+    "55043386": [
+      "[삼정KPMG] HRD 교육담당자 채용"
     ]
   }
 }
