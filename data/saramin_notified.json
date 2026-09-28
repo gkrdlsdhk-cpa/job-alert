@@ -176,7 +176,8 @@
     "55084110": "[삼정KPMG] 정보보안팀 정보보안 운영 담당자 채용",
     "55101279": "[딜로이트안진회계법인] 인재부 채용팀 대리/과장급 채용",
     "55112803": "[딜로이트안진회계법인]회계감사부문 Digital Assurance 회계사",
-    "55126983": "[삼일회계법인] Public Service팀 컨설팅 인턴 채용"
+    "55126983": "[삼일회계법인] Public Service팀 컨설팅 인턴 채용",
+    "55136324": "[삼일회계법인] Middle Market Corporate Finance 부문 채용"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -843,6 +844,9 @@
     ],
     "55126983": [
       "[삼일회계법인] Public Service팀 컨설팅 인턴 채용"
+    ],
+    "55136324": [
+      "[삼일회계법인] Middle Market Corporate Finance 부문 채용"
     ]
   }
 }
