@@ -177,7 +177,8 @@
     "55101279": "[딜로이트안진회계법인] 인재부 채용팀 대리/과장급 채용",
     "55112803": "[딜로이트안진회계법인]회계감사부문 Digital Assurance 회계사",
     "55126983": "[삼일회계법인] Public Service팀 컨설팅 인턴 채용",
-    "55136324": "[삼일회계법인] Middle Market Corporate Finance 부문 채용"
+    "55136324": "[삼일회계법인] Middle Market Corporate Finance 부문 채용",
+    "55157730": "전략·재무자문본부 Infrastructure Deal Advisory Service 인턴"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -853,6 +854,9 @@
     ],
     "55136324": [
       "[삼일회계법인] Middle Market Corporate Finance 부문 채용"
+    ],
+    "55157730": [
+      "전략·재무자문본부 Infrastructure Deal Advisory Service 인턴"
     ]
   }
 }
