@@ -191,7 +191,8 @@
     "55259747": "[딜로이트안진회계법인] 경영자문부문 Valuation 정규직",
     "55260742": "[딜로이트안진회계법인]경영자문부문 탄소중립 기후공시 컨설팅",
     "55289378": "[안진회계법인] 경영자문부문 F&R 분쟁지원 컨설턴트 계약직",
-    "55290773": "감사부문 Data Analytics   IT Specialist 인턴"
+    "55290773": "감사부문 Data Analytics   IT Specialist 인턴",
+    "55308891": "RM(Risk Management) 부문 독립성팀 인턴"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -923,6 +924,9 @@
     ],
     "55290773": [
       "감사부문 Data Analytics   IT Specialist 인턴"
+    ],
+    "55308891": [
+      "RM(Risk Management) 부문 독립성팀 인턴"
     ]
   }
 }
