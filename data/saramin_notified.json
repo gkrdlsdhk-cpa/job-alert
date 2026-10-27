@@ -212,7 +212,8 @@
     "55361721": "[삼일회계법인] 금융본부 신용평가·신용리스크 전문가 채용",
     "55313176": "경영지원본부 재무실 MBA & Billing 팀 단기 인턴 채용",
     "55356844": "컨설팅부문 데이터 분석 전문가 (Data Scientist)",
-    "55404782": "EY Parthenon VCS팀(Value Creation Strategy) 전환형 인턴"
+    "55404782": "EY Parthenon VCS팀(Value Creation Strategy) 전환형 인턴",
+    "55404876": "EY Parthenon VCS 팀(Value Creation Strategy) 컨설턴트"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -1015,6 +1016,9 @@
     ],
     "55404782": [
       "EY Parthenon VCS팀(Value Creation Strategy) 전환형 인턴"
+    ],
+    "55404876": [
+      "EY Parthenon VCS 팀(Value Creation Strategy) 컨설턴트"
     ]
   }
 }
