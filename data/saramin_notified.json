@@ -214,7 +214,8 @@
     "55356844": "컨설팅부문 데이터 분석 전문가 (Data Scientist)",
     "55404782": "EY Parthenon VCS팀(Value Creation Strategy) 전환형 인턴",
     "55404876": "EY Parthenon VCS 팀(Value Creation Strategy) 컨설턴트",
-    "55414028": "[삼정KPMG] HRD 교육담당자 채용"
+    "55414028": "[삼정KPMG] HRD 교육담당자 채용",
+    "55393782": "[딜로이트안진회계법인]회계감사부문 ESG 전문 컨설턴트 Senior"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -1024,6 +1025,9 @@
     ],
     "55414028": [
       "[삼정KPMG] HRD 교육담당자 채용"
+    ],
+    "55393782": [
+      "[딜로이트안진회계법인]회계감사부문 ESG 전문 컨설턴트 Senior"
     ]
   }
 }
