@@ -250,7 +250,8 @@
     "55586186": "[삼일회계법인] 연결시스템 구축 컨설턴트 채용",
     "55592385": "[삼일회계법인] AX Node Product Design Engineer 채용",
     "55593587": "[삼일회계법인] AX Node Backend Engineer 채용",
-    "55600182": "[삼정KPMG] ITS - IT플랫폼 운영(Entra ID·Intune) 담당자 채용"
+    "55600182": "[삼정KPMG] ITS - IT플랫폼 운영(Entra ID·Intune) 담당자 채용",
+    "55606807": "금융감사부문 IT 시스템 및 규제 프로젝트 인턴"
   },
   "notified_fingerprints": {
     "53853883": [
@@ -1201,6 +1202,9 @@
     ],
     "55600182": [
       "[삼정KPMG] ITS - IT플랫폼 운영(Entra ID·Intune) 담당자 채용"
+    ],
+    "55606807": [
+      "금융감사부문 IT 시스템 및 규제 프로젝트 인턴"
     ]
   }
 }
